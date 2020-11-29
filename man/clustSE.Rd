@@ -26,7 +26,7 @@ degrees of freedom adjustments. Useful when dealing with datasets with a few clu
 \examples{
 data(mtcars)
 ex1 <- lm(mpg ~ wt + am, data = mtcars)
-clustSE(ex1, 'cyl')
+CR2::clustSE(ex1, 'cyl')
 
 
 

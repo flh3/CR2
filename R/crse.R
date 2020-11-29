@@ -13,7 +13,7 @@
 #' @examples
 #' data(mtcars)
 #' ex1 <- lm(mpg ~ wt + am, data = mtcars)
-#' clustSE(ex1, 'cyl')
+#' CR2::clustSE(ex1, 'cyl')
 #'
 #'
 #'

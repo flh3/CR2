@@ -11,7 +11,7 @@ clustSE(mod, clust, data = NULL, digits = 4, ztest = FALSE)
 
 \item{clust}{The cluster variable (with quotes).}
 
-\item{digits}{Number of digits.}
+\item{digits}{Number of decimal places to display.}
 
 \item{ztest}{If a normal approximation should be used as the naive degrees of freedom. If FALSE, the HLM degrees of freedom will be used.}
 }

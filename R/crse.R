@@ -9,12 +9,13 @@
 #' @param clust The cluster variable (with quotes).
 #' @param digits Number of decimal places to display.
 #' @param ztest If a normal approximation should be used as the naive degrees of freedom. If FALSE, the HLM degrees of freedom will be used.
-#' @return All the CR adjustments with p values
+#' @return All the CR adjustments with p-values.
 #' @examples
 #' clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')
 #'
-#'
-#'
+#' @references
+#' Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
+#' (\href{https://www150.statcan.gc.ca/n1/pub/12-001-x/2002002/article/9058-eng.pdf}{link})
 #'
 #' @export
 clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){

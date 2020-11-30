@@ -16,7 +16,7 @@ clustSE(mod, clust, data = NULL, digits = 4, ztest = FALSE)
 \item{ztest}{If a normal approximation should be used as the naive degrees of freedom. If FALSE, the HLM degrees of freedom will be used.}
 }
 \value{
-All the CR adjustments with p values
+All the CR adjustments with p-values.
 }
 \description{
 Function to compute the CR0, CR1, CR2 cluster
@@ -26,7 +26,8 @@ degrees of freedom adjustments. Useful when dealing with datasets with a few clu
 \examples{
 clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')
 
-
-
-
+}
+\references{
+Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
+(\href{https://www150.statcan.gc.ca/n1/pub/12-001-x/2002002/article/9058-eng.pdf}{link})
 }

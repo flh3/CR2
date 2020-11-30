@@ -11,7 +11,7 @@
 #' @param ztest If a normal approximation should be used as the naive degrees of freedom. If FALSE, the HLM degrees of freedom will be used.
 #' @return All the CR adjustments with p values
 #' @examples
-#' data(mtcars)
+#' clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')
 #'
 #'
 #'

@@ -24,7 +24,7 @@ robust standard errors with Bell and McCaffrey (2002)
 degrees of freedom adjustments. Useful when dealing with datasets with a few clusters.
 }
 \examples{
-data(mtcars)
+clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')
 
 
 

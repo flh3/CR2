@@ -16,8 +16,8 @@
 #'
 #'
 #'
-"clustSE"
-clustSE <- function(mod, clust, digits = 4, ztest = FALSE){
+#' @export
+clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
 
   if (is.null(data)) data <- eval(mod$call$data) #OLD
 

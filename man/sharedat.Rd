@@ -6,29 +6,24 @@
 \title{Project SHARE}
 \format{
 A data frame with 5399 observations and 7 variables.
+
+\describe{
+\item{\code{school}}{The cluster variable}
+\item{\code{sex}}{factor indicating F or M}
+\item{\code{arm}}{treatment arm = 1 vs control = 0}
+\item{\code{kscore}}{Pupil knowledge of sexual health}
+\item{\code{idno}}{student id number}
+\item{\code{sc}}{factor showing the highest social class of the father or mother
+based on occupation (coded 10: I (highest), 20: II,
+31: III non-manual, 32: III manual, 40: IV, 50: V (lowest), 99: not coded).}
+\item{\code{zscore}}{standardized knowledge score}
+}
 }
 \source{
 \href{https://doi.org/10.7910/DVN/YXMQZM}{Harvard dataverse}
 }
 \usage{
 data(sharedat)
-}
-\arguments{
-\item{school}{The cluster variable.}
-
-\item{sex}{factor indicating F or M}
-
-\item{arm}{treatment arm = 1 vs control = 0}
-
-\item{kscore}{Pupil knowledge of sexual health}
-
-\item{idno}{student id number}
-
-\item{sc}{factor showing the highest social class of the father or mother
-based on occupation (coded 10: I (highest), 20: II,
-31: III non-manual, 32: III manual, 40: IV, 50: V (lowest), 99: not coded).}
-
-\item{zscore}{standardized knowledge score}
 }
 \description{
 Project SHARE (Sexual Health and Relationships) was a cluster randomized trial (CRT) in
@@ -39,7 +34,7 @@ sexual health program (Wight et al., 2002).
 data(sharedat)
 }
 \references{
-Moulton, L. (2015). readme.txt contains an overall explanation of the data sets \link{Data set}. Harvard.
+Moulton, L. (2015). readme.txt contains an overall explanation of the data sets. Harvard.
 (\href{https://doi.org/10.7910/DVN/YXMQZM}{link})
 
 Wight, D., Raab, G. M., Henderson, M., Abraham, C., Buston, K., Hart, G., & Scott, S. (2002). Limits of teacher delivered sex education:

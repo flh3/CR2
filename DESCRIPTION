@@ -1,13 +1,13 @@
 Package: CR2
-Title: What the Package Does (One Line, Title Case)
+Title: Compute cluster robust standard errors with degrees of freedom adjustments
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Francis",
+           family = "Huang",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
+           email = "flhuang2000@yahoo.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: Compute cluster robust standard errors (CR0, CR1, CR2) with degrees of freedom adjustments.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -12,13 +12,12 @@
 #' @return All the CR adjustments with p values
 #' @examples
 #' data(mtcars)
-#' ex1 <- lm(mpg ~ wt + am, data = mtcars)
-#' CR2::clustSE(ex1, 'cyl')
 #'
 #'
 #'
 #'
-clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
+"clustSE"
+clustSE <- function(mod, clust, digits = 4, ztest = FALSE){
 
   if (is.null(data)) data <- eval(mod$call$data) #OLD
 

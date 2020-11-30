@@ -28,12 +28,12 @@
 #'
 #' @references
 #'
-#' Moulton, L. (2015). readme.txt contains an overall explanation of the data sets. Harvard.
-#' (\href{https://doi.org/10.7910/DVN/YXMQZM}{link})
+#' \cite{Moulton, L. (2015). readme.txt contains an overall explanation of the data sets. Harvard.
+#' (\href{https://doi.org/10.7910/DVN/YXMQZM}{link})}
 #'
-#' Wight, D., Raab, G. M., Henderson, M., Abraham, C., Buston, K., Hart, G., & Scott, S. (2002). Limits of teacher delivered sex education:
+#' \cite{Wight, D., Raab, G. M., Henderson, M., Abraham, C., Buston, K., Hart, G., & Scott, S. (2002). Limits of teacher delivered sex education:
 #' Interim behavioural outcomes from randomised trial. BMJ, 324, 1430.
-#' (\href{https://doi.org/10.1136/bmj.324.7351.1430}{doi})
+#' (\href{https://doi.org/10.1136/bmj.324.7351.1430}{doi})}
 #'
 #'
 #' @source \href{https://doi.org/10.7910/DVN/YXMQZM}{Harvard dataverse}

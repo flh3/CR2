@@ -12,7 +12,7 @@ To install, in SPSS, go to Extensions -> Utilities -> Install Custom Dialog (Com
 
 A new item is now added under Analyze -> Regression -> Cluster Robust... [for now, can only be used for linear regression]
 
-If you have a large number of clusters (e.g., > 50), just use the CR0 (Liang & Zeger, 1986) or CR1 option with the HLM degrees of freedom (this makes it run quicker).
+If you have a large number of clusters (e.g., > 50), just use the CR0 (Liang & Zeger, 1986) or CR1 option with the HLM degrees of freedom (this makes it run faster).
 
 If you have few clusters (e.g., < 50), use the CR2 option together with the Bell & McCaffrey dof adjustment. 
 

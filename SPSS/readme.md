@@ -6,7 +6,7 @@ For computing cluster robust standard errors with degrees of freedom adjustments
 
 To download, just click on the *.spd file and then choose the download option on the following screen. 
 To install, **DO NOT** double click on the *.spd file.
-To install, in SPSS, go to Extensions -> Utilities -> Install Custom Dialog (Compatability Mode)... select the downloaded file and click OK to install.
+To install, in SPSS, go to Extensions -> Utilities -> Install Custom Dialog (Compatibility Mode)... select the downloaded file and click OK to install.
 
 ## Usage: 
 

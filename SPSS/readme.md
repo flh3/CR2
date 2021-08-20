@@ -20,7 +20,7 @@ If you have few clusters (e.g., < 50), use the CR2 option together with the Bell
 
 In SPSS, choose Extensions -> Utilities -> Custom Dialogue Builder (Compatibility mode)-> File -> Uninstall (select the CLUSTER... file)
 
-## Updates
+## Updates:
 
 1.01 Can have L1 or L2 left blank (no predictors at that level).
 

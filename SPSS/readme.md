@@ -5,7 +5,7 @@ For computing cluster robust standard errors with degrees of freedom adjustments
 ## To install: 
 
 To download, just click on the *.spd file and then choose the download option on the following screen. 
-To install, **DO NOT** double click on the *.spd file.
+To install, **DO NOT** double click on the *.spd file.^[This used to work though with earlier versions of SPSS?]
 To install, in SPSS, go to Extensions -> Utilities -> Install Custom Dialog (Compatibility Mode)... select the downloaded file and click OK to install.
 
 ## Usage: 
@@ -22,5 +22,6 @@ In SPSS, choose Extensions -> Utilities -> Custom Dialogue Builder (Compatibilit
 
 ## Updates:
 
-1.01 Can have L1 or L2 left blank (no predictors at that level).
+1.01  Can have L1 or L2 left blank (no predictors at that level).
+1.2   Output is now in a table and can be copied and pasted into Excel for easier formatting
 

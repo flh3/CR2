@@ -16,7 +16,7 @@
 #'   \item{\code{arm}}{treatment arm = 1 vs control = 0}
 #'   \item{\code{kscore}}{Pupil knowledge of sexual health}
 #'   \item{\code{idno}}{student id number}
-#'    \item{\code{sc}}{factor showing the highest social class of the father or mother
+#'   \item{\code{sc}}{factor showing the highest social class of the father or mother
 #'    based on occupation (coded 10: I (highest), 20: II,
 #'    31: III non-manual, 32: III manual, 40: IV, 50: V (lowest), 99: not coded).}
 #'    \item{\code{zscore}}{standardized knowledge score}

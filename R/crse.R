@@ -1,21 +1,40 @@
 #' Cluster robust standard errors with degrees of freedom adjustments
 #'
 #' Function to compute the CR0, CR1, CR2 cluster
-#' robust standard errors with Bell and McCaffrey (2002)
+#' robust standard errors (SE) with Bell and McCaffrey (2002)
 #' degrees of freedom adjustments. Useful when dealing with datasets with a few clusters.
 #'
 #'
 #' @param mod The \code{lm} model object.
 #' @param clust The cluster variable (with quotes).
 #' @param digits Number of decimal places to display.
-#' @param ztest If a normal approximation should be used as the naive degrees of freedom. If FALSE, the HLM degrees of freedom will be used.
-#' @return All the CR adjustments with p-values.
+#' @param ztest If a normal approximation should be used as the naive degrees of freedom. If FALSE, the between-within degrees of freedom will be used.
+#' @return A data frame with the CR adjustments with p-values.
+#' \item{estimate}{The regression coefficient.}
+#' \item{se.unadj}{The model-based (regular, unadjusted) SE.}
+#' \item{CR0}{Cluster robust SE based on Liang & Zeger (1986).}
+#' \item{CR1}{Cluster robust SE (using an adjustment based on number of clusters).}
+#' \item{CR2}{Cluster robust SE based on Bell and McCaffrey (2002).}
+#' \item{tCR2}{t statistic based on CR2.}
+#' \item{dfn}{Degrees of freedom(naive): can be infinite (Z) or between-within (default). User specified.}
+#' \item{dfBM}{Degrees of freedom based on Bell and McCaffrey (2002).}
+#' \item{pv.unadj}{p value based on model-based standard errors.}
+#' \item{CR0pv}{p value based on CR0 SE with dfBM.}
+#' \item{CR0pv.n}{p value  based on CR0 SE with naive df.}
+#' \item{CR1pv}{p value based on CR1 SE with dfBM.}
+#' \item{CR1pv.n}{p value  based on CR1 SE with naive df.}
+#' \item{CR2pv}{p value based on CR2 SE with dfBM.}
+#' \item{CR2pv.n}{p value  based on CR2 SE with naive df.}
+#'
 #' @examples
 #' clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')
 #'
 #' @references
 #' \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
 #' (\href{https://www150.statcan.gc.ca/n1/pub/12-001-x/2002002/article/9058-eng.pdf}{link})}
+#'
+#' Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.
+#' \doi{10.1093/biomet/73.1.13}
 #'
 #' @export
 clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
@@ -158,13 +177,14 @@ clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
     ####
 
     #ns <- nobs(mod)
-    df1 <- n - l1v - l2v
+    df1 <- n - l1v - NG #l2v old HLM
     df2 <- NG - l2v - 1
 
     dfn <- rep(df1, length(levs)) #naive
     dfn[levs == '2'] <- df2
+    dfn[1] <- df2 #intercept
 
-  } else {
+      } else {
 
     dfn <- rep(Inf, k) #infinite
   }

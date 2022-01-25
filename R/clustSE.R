@@ -2,9 +2,10 @@
 #'
 #' Function to compute the CR0, CR1, CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
-#' degrees of freedom adjustments. Useful when dealing with datasets with a few clusters.
+#' degrees of freedom (dof) adjustments. Useful when dealing with datasets with a few clusters.
+#' Shows output using different CR types and dof choices (for comparative purposes only).
 #'
-#'
+#' @importFrom stats nobs resid residuals var coef pt model.matrix family weights fitted.values
 #' @param mod The \code{lm} model object.
 #' @param clust The cluster variable (with quotes).
 #' @param digits Number of decimal places to display.
@@ -16,7 +17,7 @@
 #' \item{CR1}{Cluster robust SE (using an adjustment based on number of clusters).}
 #' \item{CR2}{Cluster robust SE based on Bell and McCaffrey (2002).}
 #' \item{tCR2}{t statistic based on CR2.}
-#' \item{dfn}{Degrees of freedom(naive): can be infinite (Z) or between-within (default). User specified.}
+#' \item{dfn}{Degrees of freedom(naive): can be infinite (z) or between-within (default). User specified.}
 #' \item{dfBM}{Degrees of freedom based on Bell and McCaffrey (2002).}
 #' \item{pv.unadj}{p value based on model-based standard errors.}
 #' \item{CR0pv}{p value based on CR0 SE with dfBM.}
@@ -28,6 +29,8 @@
 #'
 #' @examples
 #' clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')
+#' data(sch25)
+#' clustSE(lm(math ~ ses + minority + mses + mhmwk, data = sch25), 'schid')
 #'
 #' @references
 #' \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
@@ -37,9 +40,12 @@
 #' \doi{10.1093/biomet/73.1.13}
 #'
 #' @export
-clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
+clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
-  if (is.null(data)) data <- eval(mod$call$data) #OLD
+  #if (is.null(data))
+  data <- eval(mod$call$data) #OLD
+  if (class(mod)[1] != 'glm' & class(mod)[1] != 'lm') stop("Must include a model object of class glm or lm.")
+  if (is.null(clust)) stop("Must include a cluster name. clust = 'cluster'")
 
   tmp <- summary(mod)
   se.n <- tmp$coefficients[,2]
@@ -58,7 +64,8 @@ clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
   #data[,clust] <- as.character(data[,clust])
 
   NG <- length(table(data[,clust])) #how many clusters
-  cpx <- solve(crossprod(X)) #(X'X)-1 or inverse of the cp of X
+  #cpx <- solve(crossprod(X)) #(X'X)-1 or inverse of the cp of X
+  cpx <- chol2inv(qr.R(qr(X))) #using QR decomposition, faster, more stable?
 
   cnames <- names(table(data[,clust])) #names of the clusters
   js <- table(data[,clust]) #how many in each cluster
@@ -83,7 +90,6 @@ clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
 
   u1 <- u2 <- matrix(NA, nrow = NG, ncol = k)
   dfa <- (NG / (NG - 1))  * ((n - 1)/(n - k)) #for HC1 / Stata
-
   #dfa <- NG / (NG - 1) #used by SAS
 
   ## function for Liang and Zeger SEs
@@ -226,6 +232,7 @@ clustSE <- function(mod, clust, data = NULL, digits = 4, ztest = FALSE){
 
 
 ## Imbens and Kolesar function :: inverse of symmetric square root
+## different from sandwich (if ev < 0, not PD)
 MatSqrtInverse <- function(A) {
   ##  Compute the inverse square root of a matrix
   ei <- eigen(A) #obtain eigenvalues and eigenvectors

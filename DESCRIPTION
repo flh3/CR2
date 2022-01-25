@@ -1,5 +1,5 @@
 Package: CR2
-Title: Compute cluster robust standard errors with degrees of freedom adjustments.
+Title: Compute cluster robust standard errors with degrees of freedom adjustments
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Francis",
@@ -7,8 +7,8 @@ Authors@R:
            role = c("aut", "cre"),
            email = "flhuang2000@yahoo.com",
            comment = c(ORCID = "0000-0002-5900-7763"))
-Description: Compute cluster robust standard errors (CR0, CR1, CR2) with degrees of freedom adjustments.
-License: MIT + file LICENSE
+Description: Compute cluster robust standard errors (CR0, CR1, CR2) with degrees of freedom adjustments. Standard errors are computed based on Liang and Zeger (1986) <doi:10.1093/biomet/73.1.13> and Bell and McCaffrey <https://www150.statcan.gc.ca/n1/en/pub/12-001-x/2002002/article/9058-eng.pdf?st=NxMjN1YZ>. 
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

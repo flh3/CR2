@@ -267,7 +267,7 @@ satdf <- function(mod){
   NG <- length(cnames)
   Id <- diag(nobs(mod))
 
-
+  Hsel <- Id - Hm #this missing?
   ## STEP 1
 
   tHs <- function(s) {
@@ -303,7 +303,7 @@ satdf <- function(mod){
 
   tX <- lapply(cnames, tXs)
 
-  Hsel <- Id - Hm
+
 
   ## step 3
 

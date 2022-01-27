@@ -81,9 +81,11 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   ml <- lapply(cnames, Xj) #need these matrices for CR2 computation
 
   #########
-  re <- resid(mod) #regular lm
-  if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "working")  * sqrt(weights(mod, "working")) #residuals
+  #re <- resid(mod) #regular lm
+  #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "working")  * sqrt(weights(mod, "working")) #manual
+  #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "pearson")
 
+  re <- resid(mod, 'pearson') #works for both lm and glm
   cdata <- data.frame(data[,clust], re ) #data with cluster and residuals
   names(cdata) <- c('cluster', 'r')
   gs <- names(table(cdata$cluster))

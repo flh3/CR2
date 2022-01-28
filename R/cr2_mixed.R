@@ -30,7 +30,7 @@ cr2_mixed <- function(m1, digits = 4, satt = F){
 
     { #done a bit later than necessary but that is fine
       if(is.unsorted(gpsv)){
-        stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
+       # stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
       }
     }
 
@@ -91,6 +91,7 @@ cr2_mixed <- function(m1, digits = 4, satt = F){
   #cdata <- data.frame(cluster = dat[,Gname])
   #NG <- length(cnames)
   Vinv <- solve(Vm) #slow
+  #Vinv <- chol2inv(chol(Vm))
 
   Q <- solve(t(X) %*% Vinv %*% X)
 
@@ -174,7 +175,7 @@ cr2_mixed <- function(m1, digits = 4, satt = F){
   dfn.CR0 <- dfn
 
   if (satt == T){
-    dfn <- satdf(m1)
+    dfn <- satdf(m1, Vinv = Vinv)
   }
 
   robse <- as.numeric(rse)
@@ -229,7 +230,7 @@ MatSqrtInverse <- function(A) {
 
 ## empirical DOF
 
-satdf <- function(mod){
+satdf <- function(mod, Vinv = Vinv){
   if(class(mod) == 'lme') {
     dat <- mod$data
     fml <- formula(mod)
@@ -243,17 +244,19 @@ satdf <- function(mod){
     Gname <- names(getME(mod, 'l_i'))
     gpsv <- mod@frame[, Gname]
 
-    getV <- function(x) {
-      lam <- data.matrix(getME(x, "Lambdat"))
-      var.d <- crossprod(lam)
-      Zt <- data.matrix(getME(x, "Zt"))
-      vr <- sigma(x)^2
-      var.b <- vr * (t(Zt) %*% var.d %*% Zt)
-      sI <- vr * diag(nobs(x))
-      var.y <- var.b + sI
-    }
-    Vm <- getV(mod)
-    Vinv <- solve(Vm)
+    # getV <- function(x) {
+    #   lam <- data.matrix(getME(x, "Lambdat"))
+    #   var.d <- crossprod(lam)
+    #   Zt <- data.matrix(getME(x, "Zt"))
+    #   vr <- sigma(x)^2
+    #   var.b <- vr * (t(Zt) %*% var.d %*% Zt)
+    #   sI <- vr * diag(nobs(x))
+    #   var.y <- var.b + sI
+    # }
+    # Vm <- getV(mod)
+    # Vinv <- solve(Vm)
+
+    #Vinv <- chol2inv(chol(Vm))
 
   } else {
     stop("Type of object is not an lmer or lme object.")

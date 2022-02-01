@@ -266,7 +266,8 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   #gams <- solve(t(X) %*% solve(Vm) %*% X) %*% (t(X) %*% solve(Vm) %*% y)
   #SEm <- as.numeric(sqrt(diag(solve(t(X) %*% solve(Vm) %*% X)))) #X' Vm-1 X
-  SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
+  #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
+  SE <- as.numeric(sqrt(diag(br)))
   return(data.frame(
     #FE_manual = as.numeric(gams),
     FE_auto,

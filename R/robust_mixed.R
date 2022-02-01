@@ -31,6 +31,11 @@
 #' \item{p.values}{The p values based on the t-statistic and the df.}
 #' \item{Sig}{Stars symbolically showing statistical significance.}
 #'
+#' @examples
+#' data(mtcars)
+#' require(lme4)
+#' robust_mixed(lmer(mpg ~ wt + am + (1|cyl), data = mtcars))
+#'
 #' @export
 robust_mixed <- function(m1, digits = 4, Gname = NULL){
 
@@ -157,7 +162,8 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
 
   #gams <- solve(t(X) %*% solve(Vm) %*% X) %*% (t(X) %*% solve(Vm) %*% y)
   #SE <- as.numeric(sqrt(diag(solve(t(X) %*% Vinv %*% X)))) #X' Vm-1 X
-  SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
+  #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
+  SE <- as.numeric(sqrt(diag(br2)))
   return(data.frame(
     #FE_manual = as.numeric(gams),
     estimate = round(FE_auto, digits),

@@ -31,6 +31,12 @@ if there are only a few clusters (e.g., < 40). The robust standard errors (CR0) 
 based on the formulation of Liang and Zeger (1986). For a few clusters, use the
 CR2 version using the \code{clubSandwich} package (see Pustejovsky & Tipton, 2018).
 }
+\examples{
+data(mtcars)
+require(lme4)
+robust_mixed(lmer(mpg ~ wt + am + (1|cyl), data = mtcars))
+
+}
 \references{
 Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.
 \doi{10.1093/biomet/73.1.13}

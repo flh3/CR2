@@ -19,7 +19,7 @@
 #' \doi{10.1080/07350015.2016.1247004}
 #'
 #' @importFrom stats var pt sigma model.matrix
-#' @import lme4
+#' @importFrom lme4 vcov.merMod
 #' @return
 #' Returns a data frame containing the estimates, model-based and empirical standard errors,
 #' as well as the t-statistic, degrees of freedom, and p values.
@@ -31,12 +31,9 @@
 #' \item{p.values}{The p values based on the t-statistic and the df.}
 #' \item{Sig}{Stars symbolically showing statistical significance.}
 #'
-#' @examples
-#' data(mtcars)
-#' require(lme4)
-#' robust_mixed(lmer(mpg ~ wt + am + (1|cyl), data = mtcars))
 #' @export
 robust_mixed <- function(m1, digits = 4, Gname = NULL){
+
   if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
     X <- model.matrix(m1) #X matrix
     B <- fixef(m1) #coefficients
@@ -91,7 +88,7 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
 
     ml <- list()
     for (j in 1:NG){
-      test <- getVarCov(m1, individuals = j, type = 'marginal')
+      test <- nlme::getVarCov(m1, individuals = j, type = 'marginal')
       ml[[j]] <- test[[1]]
     }
 

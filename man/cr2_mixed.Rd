@@ -4,14 +4,14 @@
 \alias{cr2_mixed}
 \title{Cluster robust standard errors with degrees of freedom adjustments}
 \usage{
-cr2_mixed(m1, digits = 4, satt = F)
+cr2_mixed(m1, digits = 4, satt = FALSE)
 }
 \arguments{
+\item{m1}{The \code{merMod} model object.}
+
 \item{digits}{Number of decimal places to display.}
 
 \item{satt}{If Satterthwaite degrees of freedom are to be computed}
-
-\item{mod}{The \code{merMod} model object.}
 }
 \value{
 A data frame with the CR adjustments with p-values.

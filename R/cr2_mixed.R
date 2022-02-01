@@ -6,8 +6,8 @@
 #'
 #' EXPERIMENTAL
 #'
-#' @importFrom stats nobs resid residuals var coef pt model.matrix family weights fitted.values
-#' @param mod The \code{merMod} model object.
+#' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
+#' @param m1 The \code{merMod} model object.
 #' @param digits Number of decimal places to display.
 #' @param satt If Satterthwaite degrees of freedom are to be computed
 #' @return A data frame with the CR adjustments with p-values.
@@ -23,7 +23,6 @@
 #'
 #' @export
 cr2_mixed <- function(m1, digits = 4, satt = FALSE){
-  require(Matrix)
 
   ### for lmer
   if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
@@ -93,7 +92,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
       ml[[j]] <- test[[1]]
     }
 
-    Vm <- bdiag(ml)
+    Vm <- Matrix::bdiag(ml)
   }
 
   ### robust computation :: once all elements are extracted

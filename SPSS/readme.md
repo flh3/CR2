@@ -22,6 +22,6 @@ In SPSS, choose Extensions -> Utilities -> Custom Dialogue Builder (Compatibilit
 
 ## Updates:
 
-1.01  Can have L1 or L2 left blank (no predictors at that level).
+1.01  Can have L1 or L2 left blank (no predictors at that level).<BR>
 1.2   Output is now in a table and can be copied and pasted into Excel for easier formatting
 

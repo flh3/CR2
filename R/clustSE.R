@@ -237,7 +237,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 ## different from sandwich (if ev < 0, not PD)
 MatSqrtInverse <- function(A) {
   ##  Compute the inverse square root of a matrix
-  ei <- eigen(A) #obtain eigenvalues and eigenvectors
+  ei <- eigen(A, symmetric = TRUE) #obtain eigenvalues and eigenvectors
   d <- pmax(ei$values, 0) #set negatives values to zero
   d2 <- 1/sqrt(d) #get the inverse of the square root
   d2[d == 0] <- 0

@@ -289,7 +289,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
 MatSqrtInverse <- function(A) {
   ##  Compute the inverse square root of a matrix
-  ei <- eigen(A) #obtain eigenvalues and eigenvectors
+  ei <- eigen(A, symmetric = TRUE) #obtain eigenvalues and eigenvectors
   d <- pmax(ei$values, 10^-12) #set negatives values to zero
   #or near zero 10^-12
   d2 <- 1/sqrt(d) #get the inverse of the square root

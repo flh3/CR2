@@ -53,8 +53,19 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   #X <- model.matrix.lm(mod, data, na.action = "na.pass")
   X <- model.matrix(mod) #to keep NAs if
+  n <- nobs(mod) #how many total observations
+
+
   #if (sum(class(mod) == 'glm')) X <- model.matrix(mod) * sqrt(weights(mod, "working"))
   if (family(mod)[[1]] != 'gaussian') X <- model.matrix(mod) * sqrt(weights(mod, "working"))
+
+  if (family(mod)[[1]] != 'gaussian') {
+    wts <- sqrt(weights(mod, "working"))
+  } else {
+    wts <- rep(1, n)
+  }
+
+  Wm <- diag(wts) #Weight matrix
 
   if(nrow(X) != nrow(data)) {
     #warning("Just a note: Missing data in original data.")
@@ -69,13 +80,18 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   cnames <- names(table(data[,clust])) #names of the clusters
   js <- table(data[,clust]) #how many in each cluster
-  n <- nobs(mod) #how many total observations
   k <- mod$rank #predictors + intercept
 
   Xj <- function(x){ #inverse of the symmetric square root (p. 709 IK)
-    Xs <- X[data[,clust] == x, , drop = F] #X per cluster
-    P <- Xs %*% cpx %*% t(Xs) # the Hat matrix
-    return(MatSqrtInverse(diag(nrow(Xs)) - P)) #I - H
+    index <- which(data[,clust] == x)
+    Xs <- X[index, , drop = F] #X per cluster
+    Hm <- Xs %*% cpx %*% t(Xs) # the Hat matrix
+    IHjj <- diag(nrow(Xs)) - Hm
+    #return(MatSqrtInverse() #I - H
+    V3 <- chol(Wm[index, index]) #based on MBB
+    Bi <- V3 %*% IHjj %*% Wm[index, index] %*% t(V3)
+    t(V3) %*% MatSqrtInverse(Bi) %*% V3
+
   }
 
   ml <- lapply(cnames, Xj) #need these matrices for CR2 computation
@@ -123,8 +139,10 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   ## STEP 1
   tXs <- function(s) {
-    Xs <- X[cdata$cluster == s, , drop = F]
-    MatSqrtInverse(diag(NROW(Xs)) - Xs %*% cpx %*% t(Xs)) %*%
+    index <- which(cdata$cluster == s)
+    Xs <- X[index, , drop = F]
+    IHjj <- diag(nrow(Xs)) - Xs %*% cpx %*% t(Xs)
+    MatSqrtInverse(IHjj) %*%
       Xs
   } # A x Xs / Need this first
 
@@ -132,8 +150,9 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   ## STEP 2
   tHs <- function(s) {
-    Xs <- X[cdata$cluster == s, , drop = F]
     index <- which(cdata$cluster == s)
+    Xs <- X[index, , drop = F]
+
     ss <- matrix(0, nrow = n, ncol = length(index)) #all 0, n x G
     ss[cbind(index, 1:length(index))] <- 1 #indicator
     ss - X %*% cpx %*% t(Xs) #overall X x crossprod x Xs'
@@ -238,7 +257,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 MatSqrtInverse <- function(A) {
   ##  Compute the inverse square root of a matrix
   ei <- eigen(A, symmetric = TRUE) #obtain eigenvalues and eigenvectors
-  d <- pmax(ei$values, 0) #set negatives values to zero
+  d <- pmax(ei$values, 10^-12) #set negatives values to zero
   d2 <- 1/sqrt(d) #get the inverse of the square root
   d2[d == 0] <- 0
   ei$vectors %*% (if (length(d2)==1) d2 else diag(d2)) %*% t(ei$vectors)

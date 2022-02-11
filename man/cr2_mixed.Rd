@@ -16,7 +16,7 @@ cr2_mixed(m1, digits = 4, satt = FALSE)
 \value{
 A data frame with the CR adjustments with p-values.
 \item{estimate}{The regression coefficient.}
-\item{se.unadj}{The model-based (regular, unadjusted) SE.}
+\item{SE_mb}{The model-based (regular, unadjusted) SE.}
 }
 \description{
 Function to compute the CR2 cluster

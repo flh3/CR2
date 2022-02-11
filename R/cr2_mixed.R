@@ -12,7 +12,7 @@
 #' @param satt If Satterthwaite degrees of freedom are to be computed
 #' @return A data frame with the CR adjustments with p-values.
 #' \item{estimate}{The regression coefficient.}
-#' \item{se.unadj}{The model-based (regular, unadjusted) SE.}
+#' \item{SE_mb}{The model-based (regular, unadjusted) SE.}
 #'
 #' @references
 #' \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
@@ -104,12 +104,10 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   u <- matrix(NA, nrow = NG, ncol = k) #LZ
   uu <- matrix(NA, nrow = NG, ncol = k) #CR2
 
-  #dat <- m1@frame
   cnames <- names(table(gpsv))
 
   #cpx <- solve(crossprod(X))
   #cpx <- chol2inv(qr.R(qr(X))) #using QR decomposition, faster, more stable?
-
   #cdata <- data.frame(cluster = dat[,Gname])
   #NG <- length(cnames)
 
@@ -121,12 +119,21 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   # to get Vc
   aa <- function(x){
     sel <- which(cdata$cluster == x)
-    chol2inv(chol(Vm[sel, sel]))
+    chol2inv(chol(Vm[sel, sel])) #this is V^-1
     #solve(Vm[sel, sel])
   }
 
   Vm2 <- lapply(cnames, aa) #Vc used
-  names(Vm2) <- cnames #naming
+
+  a2 <- function(x){
+    sel <- which(cdata$cluster == x)
+    Vm[sel, sel] #this is V^-1
+    #solve(Vm[sel, sel])
+  }
+
+  Vm3 <- lapply(cnames, a2) #Vc used
+  names(Vm2) <- names(Vm3) <- cnames #naming
+
 
   Vinv <- Matrix::bdiag(Vm2)
   # to get X V-1 X per cluster
@@ -137,52 +144,21 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   dd <- lapply(cnames, bb)
   br <- solve(Reduce("+", dd)) #bread
 
-  #Vinv <- solve(Vm) #slow
-  #Vinv <- chol2inv(chol(Vm))
-
-  #Q <- solve(t(X) %*% Vinv %*% X)
-  #print(Q)
-  ## mtsqrtinv is used below...
-
-
   tXs <- function(s) {
-    # ind <- which(gpsv == s)
-    # Xs <- X[ind, , drop = F]
-    #
-    # V2 <- solve(Vm[ind, ind])
-    # #rr <- u[ind]
-    # Ijj <- diag(length(ind))
-    # Hjj <- Xs %*% Q %*% t(Xs) %*% V2
 
-    ### new
 
     Ijj <- diag(nrow(XX[[s]]))
     Hjj <- XX[[s]] %*% br %*% t(XX[[s]]) %*% Vm2[[s]]
+    IHjj <- Ijj - Hjj
 
-    MatSqrtInverse(Ijj - Hjj)
+    #MatSqrtInverse(Ijj - Hjj) #early adjustment
+    V3 <- chol(Vm3[[s]]) #based on MBB
+    Bi <- V3 %*% IHjj %*% Vm3[[s]] %*% t(V3)
+    t(V3) %*% MatSqrtInverse(Bi) %*% V3
 
   } # A x Xs / Need this first
 
   tX <- lapply(cnames, tXs)
-
-  # for(i in 1:NG){
-  #   #print(i)
-  #   #tmp <- js[i] #how many in group
-  #   #LZ
-  #   # u[i,] <- as.numeric(t(cdata$r[cdata$cluster == gs[i]]) %*% solve(ml[[i]]) %*% X[gpsv == gs[i], 1:k])
-  #   #CR2
-  #   # uu[i,] <- as.numeric(t(cdata$r[cdata$cluster == gs[i]]) %*% solve(ml[[i]]) %*% tX[[i]])
-  #
-  #   ind <- gpsv == gs[i]
-  #   Xs <- X[ind, , drop = F]
-  #   #V2 <- solve(Vm[ind, ind])
-  #   #V2 <- chol2inv(chol(Vm[ind, ind])) #v^-1
-  #   #CR0
-  #   u[i,] <- as.numeric(t(cdata$r[ind]) %*% Vm2[[i]] %*% Xs) #V2
-  #   #CR2
-  #   uu[i,] <- as.numeric(t(cdata$r[ind]) %*% tX[[i]] %*% Vm2[[i]]  %*% XX[[i]]) #Xs
-  #
-  # }
 
   rrr <- split(rr, getME(m1, 'flist'))
 
@@ -234,7 +210,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   ####
   n <- nobs(m1)
-  #ns <- nobs(mod)
+
   df1 <- n - l1v - length(js)
   df2 <- NG - l2v
 
@@ -249,6 +225,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   robse <- as.numeric(rse)
   FE_auto <- fixef(m1)
+  cfsnames <- names(FE_auto)
   statistic.cr0 <- FE_auto / robse
   p.values.cr0 = round(2 * pt(-abs(statistic.cr0), df = dfn.CR0), digits) #using CR0
 
@@ -268,22 +245,29 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   #SEm <- as.numeric(sqrt(diag(solve(t(X) %*% solve(Vm) %*% X)))) #X' Vm-1 X
   #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
   SE <- as.numeric(sqrt(diag(br)))
-  return(data.frame(
-    #FE_manual = as.numeric(gams),
-    FE_auto,
-    #SE_manual = SEm,
-    SE_auto = SE,
+  res <- data.frame(
+    Estimate = round(FE_auto, digits),
+    SE_mb = round(SE, digits),
     dof = dfn,
-    cr0 = robse,
-    cr2 = rse2,
-    # this is just to eval
-    # robust_auto = sqrt(diag(clubSandwich::vcovCR(m1, cluster = cdata$cluster, type = 'CR2' ))),
+    cr0 = round(robse, digits),
+    cr2 = round(rse2, digits),
     p.values.cr0,
     p.values.cr2,
     stars.cr0,
     stars.cr2
   )
-  )
+
+  return(res)
+}
+
+print.cr2 <- function(z){
+
+    x <- z[[1]]
+    Estimate = x$Estimate
+    SE_mb = x$SE
+    cfsnames = z$nms
+    p.cr0 <- format.pval(x$p.values.cr0, digits = 3, eps = .001)
+    data.frame(cfs = cfsnames, Estimate, SE_mb, p.cr0)
 
 }
 
@@ -299,7 +283,6 @@ MatSqrtInverse <- function(A) {
 
 
 ## empirical DOF
-
 satdf <- function(mod, Vinv = Vinv){
   if(class(mod) == 'lme') {
     dat <- mod$data
@@ -333,7 +316,8 @@ satdf <- function(mod, Vinv = Vinv){
 
   cnames <- names(table(gpsv))
   #cpx <- solve(crossprod(X))
-  cpx <- solve(t(X) %*% Vinv %*% X) #doing it the old way
+  #cpx <- solve(t(X) %*% Vinv %*% X) #doing it the old way
+  cpx <- chol2inv(chol(t(X) %*% Vinv %*% X))
   Hm <- X %*% cpx %*% t(X) %*% Vinv
   cdata <- data.frame(cluster = dat[,Gname])
   NG <- length(cnames)
@@ -344,14 +328,6 @@ satdf <- function(mod, Vinv = Vinv){
 
   tHs <- function(s) {
     sel <- which(cdata$cluster == s)
-
-    #Xs <- X[index, , drop = FALSE]
-    #Xs <- X[cdata$cluster == s, , drop = F]
-
-    #ss <- matrix(0, nrow = n, ncol = length(index)) #all 0, n x G
-    #ss[cbind(index, 1:length(index))] <- 1 #indicator
-
-    #ss - Hm[sel, sel] #overall X x crossprod x Xs'
     Hsel[,sel]
   }
 
@@ -362,20 +338,20 @@ satdf <- function(mod, Vinv = Vinv){
 
   tXs <- function(s) {
     sel <- which(cdata$cluster == s)
-
-    #Xs <- X[sel, , drop = FALSE]
-    #Xs <- X[cdata$cluster == s, , drop = F]
     ss <- diag(length(sel))
 
     Hg <- Hm[sel, sel]
 
-    MatSqrtInverse(ss - Hg) %*% Vinv[sel, sel] #solve(Vm[sel, sel])
+    MatSqrtInverse(ss - Hg) %*% Vinv[sel, sel]
+    # IHjj <- ss - Hg
+    # Vm3 <- Vm[sel, sel]
+    # V3 <- chol(Vm3) #based on MBB
+    # Bi <- V3 %*% IHjj %*% Vm3 %*% t(V3)
+    # t(V3) %*% MatSqrtInverse(Bi) %*% Vinv[sel, sel] %*% V3
 
   } # A x Xs / Need this first
 
   tX <- lapply(cnames, tXs)
-
-
 
   ## step 3
 
@@ -404,6 +380,4 @@ satdf <- function(mod, Vinv = Vinv){
 
   return(degf)
 }
-
-
 

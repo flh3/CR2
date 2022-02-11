@@ -60,7 +60,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   if (family(mod)[[1]] != 'gaussian') X <- model.matrix(mod) * sqrt(weights(mod, "working"))
 
   if (family(mod)[[1]] != 'gaussian') {
-    wts <- sqrt(weights(mod, "working"))
+    wts <- weights(mod, "working")
   } else {
     wts <- rep(1, n)
   }
@@ -87,12 +87,15 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
     Xs <- X[index, , drop = F] #X per cluster
     Hm <- Xs %*% cpx %*% t(Xs) # the Hat matrix
     IHjj <- diag(nrow(Xs)) - Hm
-    #return(MatSqrtInverse() #I - H
-    V3 <- chol(Wm[index, index]) #based on MBB
-    Bi <- V3 %*% IHjj %*% Wm[index, index] %*% t(V3)
-    t(V3) %*% MatSqrtInverse(Bi) %*% V3
+    return(MatSqrtInverse(IHjj)) #I - H
+
+    # V3 <- chol(Wm[index, index]) #based on MBB
+    # Bi <- V3 %*% IHjj %*% Wm[index, index] %*% t(V3)
+    # t(V3) %*% MatSqrtInverse(Bi) %*% V3
 
   }
+
+
 
   ml <- lapply(cnames, Xj) #need these matrices for CR2 computation
 

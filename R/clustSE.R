@@ -1,4 +1,4 @@
-#' Cluster robust standard errors with degrees of freedom adjustments
+#' Cluster robust standard errors with degrees of freedom adjustments (for lm and glm objects)
 #'
 #' Function to compute the CR0, CR1, CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)

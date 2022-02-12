@@ -2,7 +2,7 @@
 % Please edit documentation in R/cr2_mixed.R
 \name{cr2_mixed}
 \alias{cr2_mixed}
-\title{Cluster robust standard errors with degrees of freedom adjustments}
+\title{Cluster robust standard errors with degrees of freedom adjustments for merMod objects}
 \usage{
 cr2_mixed(m1, digits = 4, satt = FALSE)
 }
@@ -22,9 +22,6 @@ A data frame with the CR adjustments with p-values.
 Function to compute the CR2 cluster
 robust standard errors (SE) with Bell and McCaffrey (2002)
 degrees of freedom (dof) adjustments.
-}
-\details{
-EXPERIMENTAL
 }
 \references{
 \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.

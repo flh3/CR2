@@ -42,18 +42,18 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
     #re <- as.numeric(y - (X %*% B + Z %*% b)) #not used, just checking
     #data.frame(re, resid(m1)) #the same
     #cor(re, resid(m1)) #1
-    # qq <- getME(m1, 'q') #columns in RE matrix
+    #qq <- getME(m1, 'q') #columns in RE matrix
 
     NG <- getME(m1, 'l_i') #number of groups :: ngrps(m1)
     NG <- NG[length(NG)]
 
     gpsv <- dat[, Gname] #data with groups
 
-    { #done a bit later than necessary but that is fine
-      if(is.unsorted(gpsv)){
-       # stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
-      }
-    }
+    # { #done a bit later than necessary but that is fine
+    #   if(is.unsorted(gpsv)){
+    #    # stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
+    #   }
+    # }
 
     getV <- function(x) {
       lam <- data.matrix(getME(x, "Lambdat"))
@@ -80,7 +80,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
     gpsv <- dat[,Gname]
     js <- table(gpsv)
 
-    { #done a bit later than necessary but that is fine
+     {#done a bit later than necessary but that is fine
       if(is.unsorted(gpsv)){
         stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
       }
@@ -92,7 +92,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
       ml[[j]] <- test[[1]]
     }
 
-    Vm <- Matrix::bdiag(ml)
+    Vm <- as.matrix(Matrix::bdiag(ml)) #to work with other funs
   }
 
   ### robust computation :: once all elements are extracted
@@ -116,26 +116,27 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   tmp <- split(X, cdata$cluster)
   XX <- lapply(tmp, function(x) matrix(x, ncol = k)) #X per clust
 
-  # to get Vc
+  # to get Vc^-1 per cluster
   aa <- function(x){
     sel <- which(cdata$cluster == x)
     chol2inv(chol(Vm[sel, sel])) #this is V^-1
     #solve(Vm[sel, sel])
   }
 
-  Vm2 <- lapply(cnames, aa) #Vc used
+  Vm2 <- lapply(cnames, aa) #Vc^-1 used
+
 
   a2 <- function(x){
     sel <- which(cdata$cluster == x)
-    Vm[sel, sel] #this is V^-1
-    #solve(Vm[sel, sel])
+    Vm[sel, sel] #this is V
+
   }
 
   Vm3 <- lapply(cnames, a2) #Vc used
   names(Vm2) <- names(Vm3) <- cnames #naming
+  #Vm2 is the inverse, Vm3 is just the plain V matrix
 
-
-  Vinv <- Matrix::bdiag(Vm2)
+  Vinv <- as.matrix(Matrix::bdiag(Vm2))
   # to get X V-1 X per cluster
   bb <- function(x){
     t(XX[[x]]) %*% Vm2[[x]] %*% XX[[x]]
@@ -146,12 +147,11 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   tXs <- function(s) {
 
-
     Ijj <- diag(nrow(XX[[s]]))
     Hjj <- XX[[s]] %*% br %*% t(XX[[s]]) %*% Vm2[[s]]
     IHjj <- Ijj - Hjj
 
-    #MatSqrtInverse(Ijj - Hjj) #early adjustment
+    #MatSqrtInverse(Ijj - Hjj) #early adjustment / valid
     V3 <- chol(Vm3[[s]]) #based on MBB
     Bi <- V3 %*% IHjj %*% Vm3[[s]] %*% t(V3)
     t(V3) %*% MatSqrtInverse(Bi) %*% V3
@@ -160,7 +160,8 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   tX <- lapply(cnames, tXs)
 
-  rrr <- split(rr, getME(m1, 'flist'))
+  #rrr <- split(rr, getME(m1, 'flist'))
+  rrr <- split(rr, cdata$cluster)
 
   # residual x inverse of V matrix x X maatrix
   cc0 <- function(x){
@@ -218,7 +219,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   dfn.CR0 <- dfn
 
   if (satt == T){
-    dfn <- satdf(m1)
+    dfn <- satdf(m1, Vinv2 = Vinv, Vm2 = Vm, br2 = br)
   }
 
   robse <- as.numeric(rse)
@@ -243,45 +244,27 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   #SEm <- as.numeric(sqrt(diag(solve(t(X) %*% solve(Vm) %*% X)))) #X' Vm-1 X
   #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
   SE <- as.numeric(sqrt(diag(br)))
-  res <- data.frame(
+  res <- cbind(
     Estimate = round(FE_auto, digits),
-    SE_mb = round(SE, digits),
-    dof = dfn,
-    cr0 = round(robse, digits),
-    cr2 = round(rse2, digits),
-    p.values.cr0,
-    p.values.cr2,
-    stars.cr0,
-    stars.cr2
+    mb.se = round(SE, digits),
+    df = round(dfn, 0),
+    cr0.se = round(robse, digits),
+    cr2.se = round(rse2, digits),
+    "Pr(>t).cr0" = p.values.cr0,
+    #stars.cr0,
+    "Pr(>t).cr2" = p.values.cr2
   )
-
+  class(res) <- 'CR2'
   return(res)
-}
-
-print.cr2 <- function(z){
-
-    x <- z[[1]]
-    Estimate = x$Estimate
-    SE_mb = x$SE
-    cfsnames = z$nms
-    p.cr0 <- format.pval(x$p.values.cr0, digits = 3, eps = .001)
-    data.frame(cfs = cfsnames, Estimate, SE_mb, p.cr0)
-
-}
-
-MatSqrtInverse <- function(A) {
-  ##  Compute the inverse square root of a matrix
-  ei <- eigen(A, symmetric = TRUE) #obtain eigenvalues and eigenvectors
-  d <- pmax(ei$values, 10^-12) #set negatives values to zero
-  #or near zero 10^-12
-  d2 <- 1/sqrt(d) #get the inverse of the square root
-  d2[d == 0] <- 0
-  ei$vectors %*% (if (length(d2)==1) d2 else diag(d2)) %*% t(ei$vectors)
 }
 
 
 ## empirical DOF
-satdf <- function(mod, Vinv = Vinv){
+satdf <- function(mod, Vinv2, Vm2, br2){
+
+  Vinv2 <- as.matrix(Vinv2)
+  Vm2 <- as.matrix(Vm2)
+
   if(class(mod) == 'lme') {
     dat <- mod$data
     fml <- formula(mod)
@@ -295,30 +278,25 @@ satdf <- function(mod, Vinv = Vinv){
     Gname <- names(getME(mod, 'l_i'))
     gpsv <- mod@frame[, Gname]
 
-    getV <- function(x) {
-      lam <- data.matrix(getME(x, "Lambdat"))
-      var.d <- crossprod(lam)
-      Zt <- data.matrix(getME(x, "Zt"))
-      vr <- sigma(x)^2
-      var.b <- vr * (t(Zt) %*% var.d %*% Zt)
-      sI <- vr * diag(nobs(x))
-      var.y <- var.b + sI
-    }
-    Vm <- getV(mod)
-    #Vinv <- solve(Vm)
-    Vinv <- chol2inv(chol(Vm))
-
   } else {
     stop("Type of object is not an lmer or lme object.")
   }
 
   cnames <- names(table(gpsv))
-  #cpx <- solve(crossprod(X))
-  #cpx <- solve(t(X) %*% Vinv %*% X) #doing it the old way
-  cpx <- chol2inv(chol(t(X) %*% Vinv %*% X))
-  Hm <- X %*% cpx %*% t(X) %*% Vinv
-  cdata <- data.frame(cluster = dat[,Gname])
   NG <- length(cnames)
+  cdata <- data.frame(cluster = dat[,Gname])
+  if(is.unsorted(gpsv)){
+    cat("Data are not sorted by cluster. df will be wrong. Please sort your data first by cluster, run the analysis, and then use the function.\n")
+  }
+
+  if (NG > 50) cat("Computing Satterthwaite df. There are", NG, "clusters. This may take a while...\n")
+
+  #print(cnames)
+  cpx <- chol2inv(chol(t(X) %*% Vinv2 %*% X))
+
+  # cpx <- br2
+  Hm <- X %*% cpx %*% t(X) %*% Vinv2
+
   Id <- diag(nobs(mod))
 
   Hsel <- Id - Hm #this missing?
@@ -331,21 +309,19 @@ satdf <- function(mod, Vinv = Vinv){
 
   tH <- lapply(cnames, tHs) #per cluster
 
-
   ## STEP 2
 
   tXs <- function(s) {
     sel <- which(cdata$cluster == s)
     ss <- diag(length(sel))
-
     Hg <- Hm[sel, sel]
 
-    MatSqrtInverse(ss - Hg) %*% Vinv[sel, sel]
-    # IHjj <- ss - Hg
-    # Vm3 <- Vm[sel, sel]
-    # V3 <- chol(Vm3) #based on MBB
-    # Bi <- V3 %*% IHjj %*% Vm3 %*% t(V3)
-    # t(V3) %*% MatSqrtInverse(Bi) %*% Vinv[sel, sel] %*% V3
+    #MatSqrtInverse(ss - Hg) %*% Vinv[sel, sel]
+
+    V3 <- chol(Vm2[sel, sel]) #based on MBB
+    Bi <- V3 %*% (ss - Hg) %*% Vm2[sel, sel] %*% t(V3)
+    t(V3) %*% MatSqrtInverse(Bi) %*% V3
+
 
   } # A x Xs / Need this first
 
@@ -358,7 +334,6 @@ satdf <- function(mod, Vinv = Vinv){
     Xs <- X[sel, , drop = FALSE]
     Xs %*% cpx
   }
-
 
   tF <- lapply(cnames, tFs)
   ## STEP 3

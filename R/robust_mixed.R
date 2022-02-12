@@ -61,15 +61,8 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
 
     ml <- list() #empty list to store matrices
 
-    getV <- function(x) {
-      lam <- data.matrix(getME(x, "Lambdat"))
-      var.d <- crossprod(lam)
-      Zt <- data.matrix(getME(x, "Zt"))
-      vr <- sigma(x)^2
-      var.b <- vr * (t(Zt) %*% var.d %*% Zt)
-      sI <- vr * diag(nobs(x))
-      var.y <- var.b + sI
-    }
+  ### getV from helper
+
     Vm <- getV(m1)
   }
 
@@ -124,7 +117,7 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   clvc2 <- br2 %*% mt %*% br2
   rse <- sqrt(diag(clvc2))
 
-  ### HLM dof
+  ### BW dof
   chk <- function(x){
     vrcheck <- sum(tapply(x, gpsv, var), na.rm = T) #L1,
     # na needed if only one observation with var = NA
@@ -134,7 +127,7 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   }
 
   levs <- apply(X, 2, chk) #all except intercept
-  levs[1] <- 1 #intercept
+  #levs[1] <- 1 #intercept
 
   tt <- table(levs)
   l1v <- tt['1']
@@ -145,8 +138,8 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
 
   ####
   n <- nobs(m1)
-  df1 <- n - l1v - NG + 1 #l2v
-  df2 <- NG - l2v - 1
+  df1 <- n - l1v - NG  #l2v + 1
+  df2 <- NG - l2v
   dfn <- rep(df1, length(levs)) #naive
   dfn[levs == '2'] <- df2
 
@@ -164,18 +157,21 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   #SE <- as.numeric(sqrt(diag(solve(t(X) %*% Vinv %*% X)))) #X' Vm-1 X
   #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
   SE <- as.numeric(sqrt(diag(br2)))
-  return(data.frame(
+  out <- cbind(
     #FE_manual = as.numeric(gams),
-    estimate = round(FE_auto, digits),
+    Estimate = round(FE_auto, digits),
     #SE_manual = SEm,
     mb.se = round(SE, digits),
     robust.se = round(robse, digits),
     t.stat = round(statistic, digits),
     df = dfn,
-    p.values = round(p.values, digits),
-    Sig = stars
-
-  )
-  )
-
+    "Pr(>t)" = round(p.values, digits)
+    #,
+    #Sig = stars
+)
+  class(out) <- "CR2"
+  #printCoefmat(out)
+  return(out)
 }
+
+

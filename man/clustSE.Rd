@@ -2,7 +2,7 @@
 % Please edit documentation in R/clustSE.R
 \name{clustSE}
 \alias{clustSE}
-\title{Cluster robust standard errors with degrees of freedom adjustments}
+\title{Cluster robust standard errors with degrees of freedom adjustments (for lm and glm objects)}
 \usage{
 clustSE(mod, clust = NULL, digits = 4, ztest = FALSE)
 }

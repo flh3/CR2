@@ -1,10 +1,10 @@
-#' Cluster robust standard errors with degrees of freedom adjustments
+#' Cluster robust standard errors with degrees of freedom adjustments for merMod objects
 #'
 #' Function to compute the CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
 #' degrees of freedom (dof) adjustments.
 #'
-#' EXPERIMENTAL
+#'
 #'
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
 #' @param m1 The \code{merMod} model object.
@@ -162,6 +162,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   rrr <- split(rr, getME(m1, 'flist'))
 
+  # residual x inverse of V matrix x X maatrix
   cc0 <- function(x){
     rrr[[x]] %*% Vm2[[x]] %*% XX[[x]]
   }
@@ -174,7 +175,6 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 
   uu <- t(sapply(1:NG, cc2)) #using 1:NG instead
 
-
   ## e'(Vg)-1 Xg ## CR0
   ## putting the pieces together
 
@@ -186,8 +186,6 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   mt2 <- t(uu) %*% uu #meat :: t(u) %*% u
   clvc2a <- br %*% mt2 %*% br
   rse2 <- sqrt(diag(clvc2a))
-
-  #print('done')
 
   ### HLM dof
   chk <- function(x){

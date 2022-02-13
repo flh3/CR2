@@ -4,7 +4,7 @@
 #' be set at the highest level. Should not be used for inferential statistical testing purposes
 #' if there are only a few clusters (e.g., < 40). The robust standard errors (CR0) are
 #' based on the formulation of Liang and Zeger (1986). For a few clusters, use the
-#' CR2 version using the \code{clubSandwich} package (see Pustejovsky & Tipton, 2018).
+#' CR2 version use the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
 #'
 #' @param m1 lme4 or nlme model object.
 #' @param digits Number of digits for output.
@@ -23,7 +23,7 @@
 #' @return
 #' Returns a data frame containing the estimates, model-based and empirical standard errors,
 #' as well as the t-statistic, degrees of freedom, and p values.
-#' \item{estimate}{Estimated regression coefficients.}
+#' \item{Estimate}{Estimated regression coefficients.}
 #' \item{mb.se}{The model-based standard errors.}
 #' \item{robust.se}{The empirical, robust standard errors.}
 #' \item{t.stat}{The t-statistics (estimate / robust.se).}
@@ -158,20 +158,28 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
   SE <- as.numeric(sqrt(diag(br2)))
   out <- cbind(
-    #FE_manual = as.numeric(gams),
     Estimate = round(FE_auto, digits),
-    #SE_manual = SEm,
     mb.se = round(SE, digits),
     robust.se = round(robse, digits),
     t.stat = round(statistic, digits),
     df = dfn,
     "Pr(>t)" = round(p.values, digits)
-    #,
-    #Sig = stars
 )
-  class(out) <- "CR2"
-  #printCoefmat(out)
-  return(out)
+
+  out2 <- data.frame(
+    Estimate = round(FE_auto, digits),
+    mb.se = round(SE, digits),
+    robust.se = round(robse, digits),
+    t.stat = round(statistic, digits),
+    df = dfn,
+    p.values = round(p.values, digits),
+    Sig = stars
+  )
+
+  res <- list(ttable = out,
+              results = out2)
+  class(res) <- "CR2"
+  return(res)
 }
 
 

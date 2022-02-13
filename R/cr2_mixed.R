@@ -244,16 +244,29 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   #SEm <- as.numeric(sqrt(diag(solve(t(X) %*% solve(Vm) %*% X)))) #X' Vm-1 X
   #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
   SE <- as.numeric(sqrt(diag(br)))
-  res <- cbind(
+  ttable <- cbind(
     Estimate = round(FE_auto, digits),
     mb.se = round(SE, digits),
-    df = round(dfn, 0),
+    df = dfn,
     cr0.se = round(robse, digits),
     cr2.se = round(rse2, digits),
     "Pr(>t).cr0" = p.values.cr0,
-    #stars.cr0,
     "Pr(>t).cr2" = p.values.cr2
   )
+  results <- data.frame(
+      Estimate = round(FE_auto, digits),
+      mb.se = round(SE, digits),
+      df = dfn,
+      cr0.se = round(robse, digits),
+      cr2.se = round(rse2, digits),
+      p.cr0 = p.values.cr0,
+      stars.cr0,
+      p.cr2 = p.values.cr2,
+      stars.cr2
+    )
+
+  res <- list(ttable = ttable,
+              results = results)
   class(res) <- 'CR2'
   return(res)
 }

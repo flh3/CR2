@@ -16,7 +16,7 @@ robust_mixed(m1, digits = 4, Gname = NULL)
 \value{
 Returns a data frame containing the estimates, model-based and empirical standard errors,
 as well as the t-statistic, degrees of freedom, and p values.
-\item{estimate}{Estimated regression coefficients.}
+\item{Estimate}{Estimated regression coefficients.}
 \item{mb.se}{The model-based standard errors.}
 \item{robust.se}{The empirical, robust standard errors.}
 \item{t.stat}{The t-statistics (estimate / robust.se).}
@@ -29,7 +29,7 @@ If there are more than two levels of clustering, the clustering variable should
 be set at the highest level. Should not be used for inferential statistical testing purposes
 if there are only a few clusters (e.g., < 40). The robust standard errors (CR0) are
 based on the formulation of Liang and Zeger (1986). For a few clusters, use the
-CR2 version using the \code{clubSandwich} package (see Pustejovsky & Tipton, 2018).
+CR2 version use the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
 }
 \examples{
 data(mtcars)

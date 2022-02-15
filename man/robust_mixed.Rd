@@ -36,6 +36,8 @@ data(mtcars)
 require(lme4)
 robust_mixed(lmer(mpg ~ wt + am + (1|cyl), data = mtcars))
 
+data(sch25)
+robust_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 }
 \references{
 Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.

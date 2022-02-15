@@ -4,6 +4,7 @@
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
 #' degrees of freedom (dof) adjustments. Useful when dealing with datasets with a few clusters.
 #' Shows output using different CR types and dof choices (for comparative purposes only).
+#' For linear and logistic regression models.
 #'
 #' @importFrom stats nobs resid residuals var coef pt model.matrix family weights fitted.values
 #' @param mod The \code{lm} model object.

@@ -36,6 +36,8 @@
 #' require(lme4)
 #' robust_mixed(lmer(mpg ~ wt + am + (1|cyl), data = mtcars))
 #'
+#'data(sch25)
+#'robust_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 #' @export
 robust_mixed <- function(m1, digits = 4, Gname = NULL){
 

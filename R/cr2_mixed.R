@@ -1,4 +1,4 @@
-#' Cluster robust standard errors with degrees of freedom adjustments for merMod objects
+#' Cluster robust standard errors with degrees of freedom adjustments for lmerMod/lme objects
 #'
 #' Function to compute the CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
@@ -7,12 +7,20 @@
 #'
 #'
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
-#' @param m1 The \code{merMod} model object.
+#' @param m1 The \code{lmerMod} or \code{lme} model object.
 #' @param digits Number of decimal places to display.
-#' @param satt If Satterthwaite degrees of freedom are to be computed
-#' @return A data frame with the CR adjustments with p-values.
-#' \item{estimate}{The regression coefficient.}
-#' \item{SE_mb}{The model-based (regular, unadjusted) SE.}
+#' @param satt If Satterthwaite degrees of freedom are to be computed.
+#' @param Gname Group/cluster name if more than two levels of clustering.
+#' @return A data frame with the cluster robust adjustments with p-values.
+#' \item{Estimate}{The regression coefficient.}
+#' \item{mb.se}{The model-based (regular, unadjusted) SE.}
+#' \item{df}{degrees of freedom: between-within or Satterthwaite.}
+#' \item{cr0.se}{CR0 standard error.}
+#' \item{cr2.se}{CR2 standard error.}
+#' \item{p.cr0}{p-value using CR0 standard error.}
+#' \item{stars.cr0}{stars showing statistical significance for CR0.}
+#' \item{p.cr2}{p-value using CR2 standard error.}
+#' \item{stars.cr2}{stars showing statistical significance for CR2.}
 #'
 #' @references
 #' \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
@@ -21,8 +29,12 @@
 #' Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.
 #' \doi{10.1093/biomet/73.1.13}
 #'
+#' @examples
+#' require(lme4)
+#' data(sch25, package = 'CR2')
+#' cr2_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 #' @export
-cr2_mixed <- function(m1, digits = 4, satt = FALSE){
+cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
 
   ### for lmer
   if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
@@ -32,10 +44,14 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
     y <- m1@resp$y #outcome
     Z <- getME(m1, 'Z') #sparse Z matrix
     b <- getME(m1, 'b') #random effects
-    Gname <- names(getME(m1, 'l_i')) #name of clustering variable
-    if (length(Gname) > 1) {
-      stop("lmer: Can only be used with two level data.")
+
+    if (is.null(Gname)){
+      Gname <- names(getME(m1, 'l_i')) #name of clustering variable
+      if (length(Gname) > 1) {
+        stop("lmer: Can only be used with non cross-classified data. If more than two levels, specify highest level using Gname = 'clustername'")
+      }
     }
+
     js <- table(dat[, Gname]) #how many observation in each cluster
     G <- bdiag(VarCorr(m1)) #G matrix
 
@@ -219,7 +235,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
   dfn.CR0 <- dfn
 
   if (satt == T){
-    dfn <- satdf(m1, Vinv2 = Vinv, Vm2 = Vm, br2 = br)
+    dfn <- satdf(m1, Vinv2 = Vinv, Vm2 = Vm, br2 = br, Gname = Gname)
   }
 
   robse <- as.numeric(rse)
@@ -272,8 +288,9 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE){
 }
 
 
+#' @export
 ## empirical DOF
-satdf <- function(mod, Vinv2, Vm2, br2){
+satdf <- function(mod, Vinv2, Vm2, br2, Gname){
 
   Vinv2 <- as.matrix(Vinv2)
   Vm2 <- as.matrix(Vm2)
@@ -288,7 +305,16 @@ satdf <- function(mod, Vinv2, Vm2, br2){
   } else if (class(mod) %in% c('lmerMod', 'lmerModLmerTest')){ #if lmer
     dat <- mod@frame
     X <- model.matrix(mod)
-    Gname <- names(getME(mod, 'l_i'))
+
+    if (is.null(Gname)){
+      Gname <- names(getME(m1, 'l_i')) #name of clustering variable
+      if (length(Gname) > 1) {
+        stop("lmer: Can only be used with non cross-classified data. If more than two levels, specify highest level using Gname = 'clustername'")
+      }
+    }
+
+    #print(Gname)
+    #Gname <- names(getME(mod, 'l_i'))
     gpsv <- mod@frame[, Gname]
 
   } else {

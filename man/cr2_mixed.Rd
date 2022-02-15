@@ -2,26 +2,40 @@
 % Please edit documentation in R/cr2_mixed.R
 \name{cr2_mixed}
 \alias{cr2_mixed}
-\title{Cluster robust standard errors with degrees of freedom adjustments for merMod objects}
+\title{Cluster robust standard errors with degrees of freedom adjustments for lmerMod/lme objects}
 \usage{
-cr2_mixed(m1, digits = 4, satt = FALSE)
+cr2_mixed(m1, digits = 4, satt = FALSE, Gname = NULL)
 }
 \arguments{
-\item{m1}{The \code{merMod} model object.}
+\item{m1}{The \code{lmerMod} or \code{lme} model object.}
 
 \item{digits}{Number of decimal places to display.}
 
-\item{satt}{If Satterthwaite degrees of freedom are to be computed}
+\item{satt}{If Satterthwaite degrees of freedom are to be computed.}
+
+\item{Gname}{Group/cluster name if more than two levels of clustering.}
 }
 \value{
-A data frame with the CR adjustments with p-values.
-\item{estimate}{The regression coefficient.}
-\item{SE_mb}{The model-based (regular, unadjusted) SE.}
+A data frame with the cluster robust adjustments with p-values.
+\item{Estimate}{The regression coefficient.}
+\item{mb.se}{The model-based (regular, unadjusted) SE.}
+\item{df}{degrees of freedom: between-within or Satterthwaite.}
+\item{cr0.se}{CR0 standard error.}
+\item{cr2.se}{CR2 standard error.}
+\item{p.cr0}{p-value using CR0 standard error.}
+\item{stars.cr0}{stars showing statistical significance for CR0.}
+\item{p.cr2}{p-value using CR2 standard error.}
+\item{stars.cr2}{stars showing statistical significance for CR2.}
 }
 \description{
 Function to compute the CR2 cluster
 robust standard errors (SE) with Bell and McCaffrey (2002)
 degrees of freedom (dof) adjustments.
+}
+\examples{
+require(lme4)
+data(sch25, package = 'CR2')
+cr2_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 }
 \references{
 \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.

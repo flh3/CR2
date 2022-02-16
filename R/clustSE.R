@@ -53,7 +53,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   pv.n <- tmp$coefficients[,4]
 
   #X <- model.matrix.lm(mod, data, na.action = "na.pass")
-  X <- model.matrix(mod) #to keep NAs if
+  X <- Xo <- model.matrix(mod) #to keep NAs if
   n <- nobs(mod) #how many total observations
 
 
@@ -62,8 +62,10 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   if (family(mod)[[1]] != 'gaussian') {
     wts <- weights(mod, "working")
+    re <- resid(mod, 'working') * wts
   } else {
     wts <- rep(1, n)
+    re <- resid(mod, 'pearson')
   }
 
   Wm <- diag(wts) #Weight matrix
@@ -85,8 +87,8 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   Xj <- function(x){ #inverse of the symmetric square root (p. 709 IK)
     index <- which(data[,clust] == x)
-    Xs <- X[index, , drop = F] #X per cluster
-    Hm <- Xs %*% cpx %*% t(Xs) # the Hat matrix
+    Xs <- Xo[index, , drop = F] #X per cluster [original, unweighted]
+    Hm <- Xs %*% cpx %*% t(Xs) %*% Wm[index, index] # the Hat matrix
     IHjj <- diag(nrow(Xs)) - Hm
     return(MatSqrtInverse(IHjj)) #I - H
 
@@ -96,8 +98,6 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   }
 
-
-
   ml <- lapply(cnames, Xj) #need these matrices for CR2 computation
 
   #########
@@ -105,7 +105,9 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "working")  * sqrt(weights(mod, "working")) #manual
   #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "pearson")
 
-  re <- resid(mod, 'pearson') #works for both lm and glm
+  #re <- resid(mod, 'pearson') #works for both lm and glm
+
+
   cdata <- data.frame(data[,clust], re ) #data with cluster and residuals
   names(cdata) <- c('cluster', 'r')
   gs <- names(table(cdata$cluster))
@@ -117,7 +119,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   ## function for Liang and Zeger SEs
   uu1 <- function(x){
     t(cdata$r[cdata$cluster == x]) %*%
-      X[cdata$cluster == x, 1:k] #e'X #plain vanilla
+      Xo[cdata$cluster == x, ] #e'X #plain vanilla
   }
 
   u1 <- t(sapply(cnames, uu1)) #use as a list?
@@ -132,7 +134,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   uu2 <- function(x){
     ind <- which(cnames == x)
     t(cdata$r[cdata$cluster == x]) %*% ml[[ind]] %*%
-      X[cdata$cluster == x, 1:k]
+      Xo[cdata$cluster == x, ]
   }
 
   u2 <- t(sapply(cnames, uu2)) #have to transpose because of sapply

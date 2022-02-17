@@ -89,7 +89,7 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
     index <- which(data[,clust] == x)
     Xs <- Xo[index, , drop = F] #X per cluster [original, unweighted]
     #wm <- Wm[index, index]
-    Hm <- Xs %*% cpx %*% t(Xs) %*% Wm[index, index] # the Hat matrix
+    Hm <- Xs %*% cpx %*% t(Xs) %*% Wm[index, index] # the Hat matrix, not symmetric
     #Hm <- sqrt(wm) %*% Xs %*% cpx %*% t(Xs) %*% sqrt(wm) # the Hat matrix
     ## This is the orig formulation
     IHjj <- diag(nrow(Xs)) - Hm

@@ -11,12 +11,12 @@ cr2_mixed(m1, digits = 4, satt = FALSE, Gname = NULL)
 
 \item{digits}{Number of decimal places to display.}
 
-\item{satt}{If Satterthwaite degrees of freedom are to be computed.}
+\item{satt}{If Satterthwaite degrees of freedom are to be computed (default uses between-within).}
 
 \item{Gname}{Group/cluster name if more than two levels of clustering.}
 }
 \value{
-A data frame with the cluster robust adjustments with p-values.
+A data frame (\code{results}) with the cluster robust adjustments with p-values.
 \item{Estimate}{The regression coefficient.}
 \item{mb.se}{The model-based (regular, unadjusted) SE.}
 \item{df}{degrees of freedom: between-within or Satterthwaite.}
@@ -30,7 +30,10 @@ A data frame with the cluster robust adjustments with p-values.
 \description{
 Function to compute the CR2 cluster
 robust standard errors (SE) with Bell and McCaffrey (2002)
-degrees of freedom (dof) adjustments.
+degrees of freedom (dof) adjustments. Suitable even with a low number.
+Works well with a larger number of clusters but the \code{robust_mixed} function
+may be faster (as it does not have to compute the symmetric square root).
+The model based (mb), CR0, and CR2 are shown for comparison purposes.
 }
 \examples{
 require(lme4)

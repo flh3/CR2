@@ -4,7 +4,7 @@
 #' be set at the highest level. Should not be used for inferential statistical testing purposes
 #' if there are only a few clusters (e.g., < 40). The robust standard errors (CR0) are
 #' based on the formulation of Liang and Zeger (1986). For a few clusters, use the
-#' CR2 version use the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
+#' CR2 version with the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
 #'
 #' @param m1 lme4 or nlme model object.
 #' @param digits Number of digits for output.
@@ -21,7 +21,7 @@
 #' @importFrom stats var pt sigma model.matrix
 #' @importFrom lme4 vcov.merMod
 #' @return
-#' Returns a data frame containing the estimates, model-based and empirical standard errors,
+#' Returns a data frame (\code{results}) containing the estimates, model-based and empirical standard errors,
 #' as well as the t-statistic, degrees of freedom, and p values.
 #' \item{Estimate}{Estimated regression coefficients.}
 #' \item{mb.se}{The model-based standard errors.}
@@ -107,14 +107,17 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   # getting CR0
   for(i in 1:NG){
     ind <- gpsv == gs[i]
-    u[i,] <- as.numeric(t(cdata$r[ind]) %*% solve(Vm[ind, ind]) %*% X[ind, 1:k])
+    #u[i,] <- as.numeric(t(cdata$r[ind]) %*% solve(Vm[ind, ind]) %*% X[ind, 1:k])
+    u[i,] <- as.numeric(t(cdata$r[ind]) %*% chol2inv(chol(Vm[ind, ind])) %*% X[ind, ])
   }
 
 
   ## e' (Zg)-1 Xg
   ## putting the pieces together
-  Vinv <- solve(Vm) #should not really do this because it is slow...
-  br2 <- solve(t(X) %*% Vinv %*% X) #bread
+  #Vinv <- solve(Vm) #should not really do this because it is slow...
+  #br2 <- solve(t(X) %*% Vinv %*% X) #bread
+  Vinv <- chol2inv(chol(Vm))
+  br2 <- chol2inv(chol(t(X) %*% Vinv %*% X))
   mt <- t(u) %*% u #meat :: t(u) %*% u
   clvc2 <- br2 %*% mt %*% br2
   rse <- sqrt(diag(clvc2))

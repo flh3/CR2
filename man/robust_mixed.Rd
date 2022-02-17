@@ -14,7 +14,7 @@ robust_mixed(m1, digits = 4, Gname = NULL)
 \item{Gname}{Group/cluster name if more than two levels of clustering.}
 }
 \value{
-Returns a data frame containing the estimates, model-based and empirical standard errors,
+Returns a data frame (\code{results}) containing the estimates, model-based and empirical standard errors,
 as well as the t-statistic, degrees of freedom, and p values.
 \item{Estimate}{Estimated regression coefficients.}
 \item{mb.se}{The model-based standard errors.}
@@ -29,7 +29,7 @@ If there are more than two levels of clustering, the clustering variable should
 be set at the highest level. Should not be used for inferential statistical testing purposes
 if there are only a few clusters (e.g., < 40). The robust standard errors (CR0) are
 based on the formulation of Liang and Zeger (1986). For a few clusters, use the
-CR2 version use the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
+CR2 version with the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
 }
 \examples{
 data(mtcars)

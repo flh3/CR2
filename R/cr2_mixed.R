@@ -2,16 +2,18 @@
 #'
 #' Function to compute the CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
-#' degrees of freedom (dof) adjustments.
-#'
+#' degrees of freedom (dof) adjustments. Suitable even with a low number.
+#' Works well with a larger number of clusters but the \code{robust_mixed} function
+#' may be faster (as it does not have to compute the symmetric square root).
+#' The model based (mb), CR0, and CR2 are shown for comparison purposes.
 #'
 #'
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
 #' @param m1 The \code{lmerMod} or \code{lme} model object.
 #' @param digits Number of decimal places to display.
-#' @param satt If Satterthwaite degrees of freedom are to be computed.
+#' @param satt If Satterthwaite degrees of freedom are to be computed (default uses between-within).
 #' @param Gname Group/cluster name if more than two levels of clustering.
-#' @return A data frame with the cluster robust adjustments with p-values.
+#' @return A data frame (\code{results}) with the cluster robust adjustments with p-values.
 #' \item{Estimate}{The regression coefficient.}
 #' \item{mb.se}{The model-based (regular, unadjusted) SE.}
 #' \item{df}{degrees of freedom: between-within or Satterthwaite.}

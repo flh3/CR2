@@ -56,13 +56,12 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   X <- Xo <- model.matrix(mod) #to keep NAs if
   n <- nobs(mod) #how many total observations
 
-
-  #if (sum(class(mod) == 'glm')) X <- model.matrix(mod) * sqrt(weights(mod, "working"))
-  if (family(mod)[[1]] != 'gaussian') X <- model.matrix(mod) * sqrt(weights(mod, "working"))
+  if (family(mod)[[1]] != 'gaussian') X <- X * sqrt(weights(mod, "working"))
 
   if (family(mod)[[1]] != 'gaussian') {
     wts <- weights(mod, "working")
-    re <- resid(mod, 'working') * wts
+    #re <- resid(mod, 'working') * wts
+    re <- resid(mod, 'response') #y - pp
   } else {
     wts <- rep(1, n)
     re <- resid(mod, 'pearson')
@@ -79,7 +78,8 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
 
   NG <- length(table(data[,clust])) #how many clusters
   #cpx <- solve(crossprod(X)) #(X'X)-1 or inverse of the cp of X
-  cpx <- chol2inv(qr.R(qr(X))) #using QR decomposition, faster, more stable?
+  #cpx <- chol2inv(qr.R(qr(X))) #using QR decomposition, faster, more stable?
+  cpx <- chol2inv(chol(t(Xo) %*% Wm %*% Xo))
 
   cnames <- names(table(data[,clust])) #names of the clusters
   js <- table(data[,clust]) #how many in each cluster
@@ -88,7 +88,10 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   Xj <- function(x){ #inverse of the symmetric square root (p. 709 IK)
     index <- which(data[,clust] == x)
     Xs <- Xo[index, , drop = F] #X per cluster [original, unweighted]
+    #wm <- Wm[index, index]
     Hm <- Xs %*% cpx %*% t(Xs) %*% Wm[index, index] # the Hat matrix
+    #Hm <- sqrt(wm) %*% Xs %*% cpx %*% t(Xs) %*% sqrt(wm) # the Hat matrix
+    ## This is the orig formulation
     IHjj <- diag(nrow(Xs)) - Hm
     return(MatSqrtInverse(IHjj)) #I - H
 
@@ -106,7 +109,6 @@ clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
   #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "pearson")
 
   #re <- resid(mod, 'pearson') #works for both lm and glm
-
 
   cdata <- data.frame(data[,clust], re ) #data with cluster and residuals
   names(cdata) <- c('cluster', 'r')

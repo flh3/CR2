@@ -38,6 +38,7 @@ Function to compute the CR0, CR1, CR2 cluster
 robust standard errors (SE) with Bell and McCaffrey (2002)
 degrees of freedom (dof) adjustments. Useful when dealing with datasets with a few clusters.
 Shows output using different CR types and dof choices (for comparative purposes only).
+For linear and logistic regression models.
 }
 \examples{
 clustSE(lm(mpg ~ am + wt, data = mtcars), 'cyl')

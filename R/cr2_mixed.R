@@ -181,7 +181,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
   #rrr <- split(rr, getME(m1, 'flist'))
   rrr <- split(rr, cdata$cluster)
 
-  # residual x inverse of V matrix x X maatrix
+  # residual x inverse of V matrix x X matrix
   cc0 <- function(x){
     rrr[[x]] %*% Vm2[[x]] %*% XX[[x]]
   }
@@ -237,7 +237,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
   dfn.CR0 <- dfn
 
   if (satt == T){
-    dfn <- satdf(m1, Vinv2 = Vinv, Vm2 = Vm, br2 = br, Gname = Gname)
+    dfn <- satdf(m1, Gname = Gname, type = 'CR2')
   }
 
   robse <- as.numeric(rse)
@@ -265,7 +265,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
   ttable <- cbind(
     Estimate = round(FE_auto, digits),
     mb.se = round(SE, digits),
-    df = dfn,
+    df = round(dfn, 1),
     cr0.se = round(robse, digits),
     cr2.se = round(rse2, digits),
     "Pr(>t).cr0" = p.values.cr0,
@@ -274,7 +274,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
   results <- data.frame(
       Estimate = round(FE_auto, digits),
       mb.se = round(SE, digits),
-      df = dfn,
+      df = round(dfn, 1),
       cr0.se = round(robse, digits),
       cr2.se = round(rse2, digits),
       p.cr0 = p.values.cr0,

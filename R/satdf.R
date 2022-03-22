@@ -5,113 +5,162 @@
 #'
 #'
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
-#' @param mod The \code{lmerMod} or \code{lme} model object.
+#' @param m1 The \code{lmerMod} or \code{lme} model object.
+#' @param type The type of cluster robust correction used (i.e., CR2 or none).
 #' @param Vinv2 Inverse of the variance matrix.
 #' @param Vm2 The variance matrix.
 #' @param br2 The bread component.
 #' @param Gname The group (clustering variable) name'
 #'
+#'
 #' @export
 ## empirical DOF
-satdf <- function(mod, Vinv2, Vm2, br2, Gname){
+satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){
 
-  Vinv2 <- as.matrix(Vinv2)
-  Vm2 <- as.matrix(Vm2)
-
-  if(class(mod) == 'lme') {
-    dat <- mod$data
-    fml <- formula(mod)
+  if(class(m1) == 'lme'){ #if nlme
+    dat <- m1$data
+    fml <- formula(m1)
     X <- model.matrix(fml, data = dat)
-    Gname <- names(mod$groups)
+    B <- fixef(m1)
+    NG <- m1$dims$ngrps[[1]]
+    if (length(m1$dims$ngrps) > 3) {stop("Can only be used with two level data (for now).")}
+    Gname <- names(m1$groups)
+    y <- dat[,as.character(m1$terms[[2]])]
     gpsv <- dat[,Gname]
+    js <- table(gpsv)
+    K <- ncol(X)
 
-  } else if (class(mod) %in% c('lmerMod', 'lmerModLmerTest')){ #if lmer
-    dat <- mod@frame
-    X <- model.matrix(mod)
+    {#done a bit later than necessary but that is fine
+      if(is.unsorted(gpsv)){
+        stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
+      }
+    }
+
+    ml <- list()
+    for (j in 1:NG){
+      test <- getVarCov(m1, individuals = j, type = 'marginal')
+      ml[[j]] <- test[[1]]
+    }
+
+    Vm <- as.matrix(Matrix::bdiag(ml)) #to work with other funs
+  }
+
+  ### for lmer
+  if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
+    dat <- m1@frame
+    X <- model.matrix(m1) #X matrix
+    B <- fixef(m1) #coefficients
+    y <- m1@resp$y #outcome
+    Z <- getME(m1, 'Z') #sparse Z matrix
+    b <- getME(m1, 'b') #random effects
 
     if (is.null(Gname)){
-      Gname <- names(getME(mod, 'l_i')) #name of clustering variable
+      Gname <- names(getME(m1, 'l_i')) #name of clustering variable
       if (length(Gname) > 1) {
         stop("lmer: Can only be used with non cross-classified data. If more than two levels, specify highest level using Gname = 'clustername'")
       }
     }
 
-    #print(Gname)
-    #Gname <- names(getME(mod, 'l_i'))
-    gpsv <- mod@frame[, Gname]
+    js <- table(dat[, Gname]) #how many observation in each cluster
+    G <- bdiag(VarCorr(m1)) #G matrix
+
+    NG <- getME(m1, 'l_i') #number of groups :: ngrps(m1)
+    NG <- NG[length(NG)]
+
+    gpsv <- dat[, Gname] #data with groups
+
+    # { #done a bit later than necessary but that is fine
+    #   if(is.unsorted(gpsv)){
+    #    # stop("Data are not sorted by cluster. Please sort your data first by cluster, run the analysis, and then use the function.\n")
+    #   }
+    # }
+
+    getV <- function(x) {
+      lam <- data.matrix(getME(x, "Lambdat"))
+      var.d <- crossprod(lam)
+      Zt <- data.matrix(getME(x, "Zt"))
+      vr <- sigma(x)^2
+      var.b <- vr * (t(Zt) %*% var.d %*% Zt)
+      sI <- vr * diag(nobs(x))
+      var.y <- var.b + sI
+    }
+    Vm <- getV(m1)
+
+  }
+
+
+  Vm <- Matrix::drop0(Vm) #make a sparse matrix, if not already
+  Vinv <- Matrix::solve(Vm)
+
+  #Vinv <- chol2inv(chol(Vm))
+  cpx <- solve(t(X) %*%  Vinv %*% X) #solve(Vm)
+  ns <- nobs(m1)
+  Im <- diag(ns) #identity matrix
+  Hm <- X %*% cpx %*% t(X) %*% Vinv #Overall hat matrix
+  IH <- Im - Hm #difference
+
+  nms <- names(table(dat[,Gname])) #names of clusters
+  K <- ncol(X) #number of vars
+  dd <- diag(K)
+  NG <- length(nms)
+
+  ### adjustments
+
+  if (type == 'CR2') {
+
+    tHs <- function(x) { #working CR2
+      ind <- which(dat[,Gname] == x)
+      Xs <- X[ind, ,drop = F]
+      Vs <- Vm[ind, ind, drop = F]
+      U <- chol(Vs) #with the cholesky matrix
+      adj <- Xs %*% cpx %*% t(Xs) %*% chol2inv(U) #solve(Vs)
+
+      Ws <- Vinv[ind, ind, drop = F] #Wj, Vinv in clusters
+      ih <- IH[ind, , drop = F] #asymmetric, need rows(ind) here
+
+      ng <- nrow(Xs)
+      cr <- diag(ng) - adj
+
+      t(ih) %*% t(U) %*% MatSqrtInverse(U %*% cr %*% Vs %*% t(U)) %*%
+        U  %*% Ws %*% Xs %*% cpx ### this has the adjustment in the matsqrtinv & U
+      # A(adjust matrix) is t(U) %*% MatSqrtInverse(U %*% cr %*% Vs %*% t(U)) %*% U
+      #IHjj <- Ijj - Hjj
+      #Bi <- chol(V3) %*% IHjj %*% V3 %*% t(chol(V3))
+      #Ai <- t(chol(V3)) %*% MatSqrtInverse(Bi) %*% chol(V3)
+    }
 
   } else {
-    stop("Type of object is not an lmer or lme object.")
+
+    tHs <- function(x) { #CR0
+
+      ind <- which(dat[,Gname] == x)
+      Xs <- X[ind, ,drop = F]
+      ih <- IH[ind, , drop = F]
+      Ws <- Vinv[ind, ind, drop = F]
+      t(ih) %*% Ws %*% Xs %*% cpx ### NO ADJUSTMENT but with Ws
+    }
   }
 
-  cnames <- names(table(gpsv))
-  NG <- length(cnames)
-  cdata <- data.frame(cluster = dat[,Gname])
-  if(is.unsorted(gpsv)){
-    cat("Data are not sorted by cluster. df will be wrong. Please sort your data first by cluster, run the analysis, and then use the function.\n")
+  tmp <- lapply(nms, tHs)
+
+  Gm = do.call('cbind', tmp) #bind them together
+  degf <- numeric() #container
+
+  #Wm <- MatSqrtInverse(Vm) #as per Tipton 2015 -- this is new
+  Wm <- Vm #W is just Vm or target variance in our case
+
+  for (j in 1:K){ #using a loop since it's easier to see
+    sel <- dd[j, ]
+    Gt <- lapply(seq(NG), function(i) tmp[[i]] %*% sel)
+    Gt = do.call('cbind', Gt)
+    #ev <- eigen(Wm %*% Gt %*% t(Gt) %*% Wm)$values
+    #degf[j] <- (sum(ev)^2) / sum(ev^2) #final step to compute df
+    #GG <- Wm %*% Gt %*% t(Gt) %*% Wm #avoids using eigen; from Kolesar
+    #degf[j] <- sum(diag(GG))^2 / sum(GG * GG)
+
+    GG <- t(Gt) %*% Wm %*% Gt  #from Pustejovsky and Tipton 2018 eq.11
+    degf[j] <- sum(diag(GG))^2 / sum(GG * GG)
   }
 
-  if (NG > 50) cat("Computing Satterthwaite df. There are", NG, "clusters. This may take a while...\n")
-
-  #print(cnames)
-  cpx <- chol2inv(chol(t(X) %*% Vinv2 %*% X))
-
-  # cpx <- br2
-  Hm <- X %*% cpx %*% t(X) %*% Vinv2
-
-  Id <- diag(nobs(mod))
-
-  Hsel <- Id - Hm #this missing?
-  ## STEP 1
-
-  tHs <- function(s) {
-    sel <- which(cdata$cluster == s)
-    Hsel[,sel]
-  }
-
-  tH <- lapply(cnames, tHs) #per cluster
-
-  ## STEP 2
-
-  tXs <- function(s) {
-    sel <- which(cdata$cluster == s)
-    ss <- diag(length(sel))
-    Hg <- Hm[sel, sel]
-
-    #MatSqrtInverse(ss - Hg) %*% Vinv[sel, sel]
-
-    V3 <- chol(Vm2[sel, sel]) #based on MBB
-    Bi <- V3 %*% (ss - Hg) %*% Vm2[sel, sel] %*% t(V3)
-    t(V3) %*% MatSqrtInverse(Bi) %*% V3
-
-
-  } # A x Xs / Need this first
-
-  tX <- lapply(cnames, tXs)
-
-  ## step 3
-
-  tFs <- function(s){
-    sel <- which(cdata$cluster == s)
-    Xs <- X[sel, , drop = FALSE]
-    Xs %*% cpx
-  }
-
-  tF <- lapply(cnames, tFs)
-  ## STEP 3
-  k <- ncol(X)
-  id <- diag(k) #number of coefficients // for different df
-  degf <- numeric(k) #vector for df // container
-
-  for (j in 1:k){ #using a loop since it's easier to see
-
-    Gt <- sapply(seq(NG), function(i) tH[[i]] %*%
-                   tX[[i]] %*% tF[[i]] %*% id[,j])
-    #already transposed because of sapply: this is G'
-    #ev <- eigen(Gt %*% t(Gt))$values #eigen values: n x n
-    ev <- eigen(t(Gt) %*% Gt)$values #much quicker this way, same result: p x p:
-    degf[j] <- (sum(ev)^2) / sum(ev^2) #final step to compute df
-  }
-
-  return(degf)
+  degf #manual computation for CR2 dof
 }

@@ -116,7 +116,12 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   ## putting the pieces together
   #Vinv <- solve(Vm) #should not really do this because it is slow...
   #br2 <- solve(t(X) %*% Vinv %*% X) #bread
-  Vinv <- chol2inv(chol(Vm))
+
+
+  Vm <- Matrix::drop0(Vm) #make a sparse matrix, if not already
+  Vinv <- Matrix::solve(Vm)
+
+  #Vinv <- chol2inv(chol(Vm))
   br2 <- chol2inv(chol(t(X) %*% Vinv %*% X))
   mt <- t(u) %*% u #meat :: t(u) %*% u
   clvc2 <- br2 %*% mt %*% br2

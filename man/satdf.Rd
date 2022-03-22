@@ -4,10 +4,12 @@
 \alias{satdf}
 \title{Compute Satterthwaite degrees of freedom}
 \usage{
-satdf(mod, Vinv2, Vm2, br2, Gname)
+satdf(m1, type = "none", Vinv2, Vm2, br2, Gname = NULL)
 }
 \arguments{
-\item{mod}{The \code{lmerMod} or \code{lme} model object.}
+\item{m1}{The \code{lmerMod} or \code{lme} model object.}
+
+\item{type}{The type of cluster robust correction used (i.e., CR2 or none).}
 
 \item{Vinv2}{Inverse of the variance matrix.}
 

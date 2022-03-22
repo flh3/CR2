@@ -17,6 +17,8 @@
 ## empirical DOF
 satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){
 
+  #require(Matrix)
+
   if(class(m1) == 'lme'){ #if nlme
     dat <- m1$data
     fml <- formula(m1)
@@ -97,7 +99,7 @@ satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){
   ns <- nobs(m1)
   Im <- diag(ns) #identity matrix
   Hm <- X %*% cpx %*% t(X) %*% Vinv #Overall hat matrix
-  IH <- Im - Hm #difference
+  IH <- as.matrix(Im - Hm) #difference
 
   nms <- names(table(dat[,Gname])) #names of clusters
   K <- ncol(X) #number of vars
@@ -143,7 +145,7 @@ satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){
 
   tmp <- lapply(nms, tHs)
 
-  Gm = do.call('cbind', tmp) #bind them together
+  #Gm = do.call('cbind', tmp) #bind them together
   degf <- numeric() #container
 
   #Wm <- MatSqrtInverse(Vm) #as per Tipton 2015 -- this is new
@@ -152,7 +154,7 @@ satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){
   for (j in 1:K){ #using a loop since it's easier to see
     sel <- dd[j, ]
     Gt <- lapply(seq(NG), function(i) tmp[[i]] %*% sel)
-    Gt = do.call('cbind', Gt)
+    Gt <- do.call('cbind', Gt)
     #ev <- eigen(Wm %*% Gt %*% t(Gt) %*% Wm)$values
     #degf[j] <- (sum(ev)^2) / sum(ev^2) #final step to compute df
     #GG <- Wm %*% Gt %*% t(Gt) %*% Wm #avoids using eigen; from Kolesar

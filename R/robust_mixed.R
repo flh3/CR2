@@ -9,7 +9,7 @@
 #' @param m1 lme4 or nlme model object.
 #' @param digits Number of digits for output.
 #' @param Gname Group/cluster name if more than two levels of clustering.
-#'
+#' @param satt Compute Satterthwaite degrees of freedom.
 #' @references Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.
 #' \doi{10.1093/biomet/73.1.13}
 #'
@@ -39,7 +39,7 @@
 #'data(sch25)
 #'robust_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 #' @export
-robust_mixed <- function(m1, digits = 4, Gname = NULL){
+robust_mixed <- function(m1, digits = 3, Gname = NULL, satt = TRUE){
 
   if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
     X <- model.matrix(m1) #X matrix
@@ -123,6 +123,7 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
 
   #Vinv <- chol2inv(chol(Vm))
   br2 <- chol2inv(chol(t(X) %*% Vinv %*% X))
+  #br2 <- Matrix::solve(t(X) %*% Vinv %*% X)
   mt <- t(u) %*% u #meat :: t(u) %*% u
   clvc2 <- br2 %*% mt %*% br2
   rse <- sqrt(diag(clvc2))
@@ -153,6 +154,10 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   dfn <- rep(df1, length(levs)) #naive
   dfn[levs == '2'] <- df2
 
+  if (satt == TRUE){
+    dfn <- satdf(m1)
+  }
+
 
   robse <- as.numeric(rse)
   FE_auto <- fixef(m1)
@@ -160,6 +165,7 @@ robust_mixed <- function(m1, digits = 4, Gname = NULL){
   p.values = round(2 * pt(-abs(statistic), df = dfn), digits)
   stars <- cut(p.values, breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
                labels = c("***", "**", "*", ".", " "), include.lowest = TRUE)
+
 
   ################# COMPARE RESULTS
 

@@ -4,7 +4,7 @@
 \alias{clustSE}
 \title{Cluster robust standard errors with degrees of freedom adjustments (for lm and glm objects)}
 \usage{
-clustSE(mod, clust = NULL, digits = 4, ztest = FALSE)
+clustSE(mod, clust = NULL, digits = 3, ztest = FALSE)
 }
 \arguments{
 \item{mod}{The \code{lm} model object.}
@@ -18,7 +18,7 @@ clustSE(mod, clust = NULL, digits = 4, ztest = FALSE)
 \value{
 A data frame with the CR adjustments with p-values.
 \item{estimate}{The regression coefficient.}
-\item{se.unadj}{The model-based (regular, unadjusted) SE.}
+\item{se.unadj}{The model-based (reglar, unadjusted) SE.}
 \item{CR0}{Cluster robust SE based on Liang & Zeger (1986).}
 \item{CR1}{Cluster robust SE (using an adjustment based on number of clusters).}
 \item{CR2}{Cluster robust SE based on Bell and McCaffrey (2002).}
@@ -36,8 +36,8 @@ A data frame with the CR adjustments with p-values.
 \description{
 Function to compute the CR0, CR1, CR2 cluster
 robust standard errors (SE) with Bell and McCaffrey (2002)
-degrees of freedom (dof) adjustments. Useful when dealing with datasets with a few clusters.
-Shows output using different CR types and dof choices (for comparative purposes only).
+degrees of freedom (df) adjustments. Useful when dealing with datasets with a few clusters.
+Shows output using different CR types and degrees of freedom choices (for comparative purposes only).
 For linear and logistic regression models.
 }
 \examples{

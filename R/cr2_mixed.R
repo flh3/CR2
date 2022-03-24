@@ -11,7 +11,7 @@
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
 #' @param m1 The \code{lmerMod} or \code{lme} model object.
 #' @param digits Number of decimal places to display.
-#' @param satt If Satterthwaite degrees of freedom are to be computed (default uses between-within).
+#' @param satt If Satterthwaite degrees of freedom are to be computed (if not, between-within df are used).
 #' @param Gname Group/cluster name if more than two levels of clustering.
 #' @return A data frame (\code{results}) with the cluster robust adjustments with p-values.
 #' \item{Estimate}{The regression coefficient.}
@@ -36,7 +36,7 @@
 #' data(sch25, package = 'CR2')
 #' cr2_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 #' @export
-cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
+cr2_mixed <- function(m1, digits = 3, satt = TRUE, Gname = NULL){
 
   ### for lmer
   if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
@@ -236,7 +236,7 @@ cr2_mixed <- function(m1, digits = 4, satt = FALSE, Gname = NULL){
 
   dfn.CR0 <- dfn
 
-  if (satt == T){
+  if (satt == TRUE){
     dfn <- satdf(m1, Gname = Gname, type = 'CR2')
   }
 

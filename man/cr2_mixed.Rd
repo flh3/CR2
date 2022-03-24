@@ -4,14 +4,14 @@
 \alias{cr2_mixed}
 \title{Cluster robust standard errors with degrees of freedom adjustments for lmerMod/lme objects}
 \usage{
-cr2_mixed(m1, digits = 4, satt = FALSE, Gname = NULL)
+cr2_mixed(m1, digits = 3, satt = TRUE, Gname = NULL)
 }
 \arguments{
 \item{m1}{The \code{lmerMod} or \code{lme} model object.}
 
 \item{digits}{Number of decimal places to display.}
 
-\item{satt}{If Satterthwaite degrees of freedom are to be computed (default uses between-within).}
+\item{satt}{If Satterthwaite degrees of freedom are to be computed (if not, between-within df are used).}
 
 \item{Gname}{Group/cluster name if more than two levels of clustering.}
 }

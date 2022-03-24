@@ -154,14 +154,17 @@ satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){
   for (j in 1:K){ #using a loop since it's easier to see
     sel <- dd[j, ]
     Gt <- lapply(seq(NG), function(i) tmp[[i]] %*% sel)
-    Gt <- do.call('cbind', Gt)
+    Gt <- as.matrix(do.call('cbind', Gt))
     #ev <- eigen(Wm %*% Gt %*% t(Gt) %*% Wm)$values
     #degf[j] <- (sum(ev)^2) / sum(ev^2) #final step to compute df
     #GG <- Wm %*% Gt %*% t(Gt) %*% Wm #avoids using eigen; from Kolesar
     #degf[j] <- sum(diag(GG))^2 / sum(GG * GG)
 
     GG <- t(Gt) %*% Wm %*% Gt  #from Pustejovsky and Tipton 2018 eq.11
-    degf[j] <- sum(diag(GG))^2 / sum(GG * GG)
+    GGd <- GG[row(GG) == col(GG)] #just diag(GG)
+
+    #degf[j] <- sum(diag(GG))^2 / sum(GG * GG) #lme issues?
+    degf[j] <- sum(GGd)^2 / sum(GG * GG)
   }
 
   degf #manual computation for CR2 dof

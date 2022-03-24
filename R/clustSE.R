@@ -2,8 +2,8 @@
 #'
 #' Function to compute the CR0, CR1, CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
-#' degrees of freedom (dof) adjustments. Useful when dealing with datasets with a few clusters.
-#' Shows output using different CR types and dof choices (for comparative purposes only).
+#' degrees of freedom (df) adjustments. Useful when dealing with datasets with a few clusters.
+#' Shows output using different CR types and degrees of freedom choices (for comparative purposes only).
 #' For linear and logistic regression models.
 #'
 #' @importFrom stats nobs resid residuals var coef pt model.matrix family weights fitted.values
@@ -41,7 +41,7 @@
 #' \doi{10.1093/biomet/73.1.13}
 #'
 #' @export
-clustSE <- function(mod, clust = NULL, digits = 4, ztest = FALSE){
+clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
 
   #if (is.null(data))
   data <- eval(mod$call$data) #OLD

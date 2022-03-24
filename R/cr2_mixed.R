@@ -2,23 +2,22 @@
 #'
 #' Function to compute the CR2 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
-#' degrees of freedom (dof) adjustments. Suitable even with a low number.
-#' Works well with a larger number of clusters but the \code{robust_mixed} function
-#' may be faster (as it does not have to compute the symmetric square root).
-#' The model based (mb), CR0, and CR2 are shown for comparison purposes.
+#' degrees of freedom (dof) adjustments. Suitable even with a low number of clusters.
+#' The model based (mb), CR0, and CR2 standard errors are shown for comparison purposes.
 #'
 #'
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
 #' @param m1 The \code{lmerMod} or \code{lme} model object.
 #' @param digits Number of decimal places to display.
+#' @param type Type of cluster robust standard error to use ("CR2" or "CR0").
 #' @param satt If Satterthwaite degrees of freedom are to be computed (if not, between-within df are used).
-#' @param Gname Group/cluster name if more than two levels of clustering.
+#' @param Gname Group/cluster name if more than two levels of clustering (does not work with lme).
 #' @return A data frame (\code{results}) with the cluster robust adjustments with p-values.
 #' \item{Estimate}{The regression coefficient.}
 #' \item{mb.se}{The model-based (regular, unadjusted) SE.}
-#' \item{df}{degrees of freedom: between-within or Satterthwaite.}
 #' \item{cr0.se}{CR0 standard error.}
 #' \item{cr2.se}{CR2 standard error.}
+#' \item{df}{degrees of freedom: Satterthwaite or between-within.}
 #' \item{p.cr0}{p-value using CR0 standard error.}
 #' \item{stars.cr0}{stars showing statistical significance for CR0.}
 #' \item{p.cr2}{p-value using CR2 standard error.}
@@ -36,7 +35,7 @@
 #' data(sch25, package = 'CR2')
 #' cr2_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 #' @export
-cr2_mixed <- function(m1, digits = 3, satt = TRUE, Gname = NULL){
+cr2_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL){
 
   ### for lmer
   if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
@@ -129,7 +128,6 @@ cr2_mixed <- function(m1, digits = 3, satt = TRUE, Gname = NULL){
   #cdata <- data.frame(cluster = dat[,Gname])
   #NG <- length(cnames)
 
-
   ### quicker way, doing the bread by cluster
   tmp <- split(X, cdata$cluster)
   XX <- lapply(tmp, function(x) matrix(x, ncol = k)) #X per clust
@@ -142,7 +140,6 @@ cr2_mixed <- function(m1, digits = 3, satt = TRUE, Gname = NULL){
   }
 
   Vm2 <- lapply(cnames, aa) #Vc^-1 used
-
 
   a2 <- function(x){
     sel <- which(cdata$cluster == x)
@@ -237,7 +234,7 @@ cr2_mixed <- function(m1, digits = 3, satt = TRUE, Gname = NULL){
   dfn.CR0 <- dfn
 
   if (satt == TRUE){
-    dfn <- satdf(m1, Gname = Gname, type = 'CR2')
+    dfn <- satdf(m1, Gname = Gname, type = type)
   }
 
   robse <- as.numeric(rse)
@@ -245,46 +242,58 @@ cr2_mixed <- function(m1, digits = 3, satt = TRUE, Gname = NULL){
   cfsnames <- names(FE_auto)
   statistic.cr0 <- FE_auto / robse
   p.values.cr0 = round(2 * pt(-abs(statistic.cr0), df = dfn.CR0), digits) #using CR0
-
   stars.cr0 <- cut(p.values.cr0, breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
                    labels = c("***", "**", "*", ".", " "), include.lowest = TRUE)
 
   statistic.cr2 <- FE_auto / rse2
   p.values.cr2 = round(2 * pt(-abs(statistic.cr2), df = dfn), digits)
-  ### changed for sim-- using HLM df for both
-  ### change to df = dfn for satt dfn
   stars.cr2 <- cut(p.values.cr2, breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
                    labels = c("***", "**", "*", ".", " "), include.lowest = TRUE)
 
-  ################# COMPARE RESULTS
+
+
+  if (type == 'CR2'){ #to keep things simple
+    robs = rse2
+    pv = p.values.cr2
+  } else {
+    robs = robse
+    pv = p.values.cr0
+  }
 
   #gams <- solve(t(X) %*% solve(Vm) %*% X) %*% (t(X) %*% solve(Vm) %*% y)
   #SEm <- as.numeric(sqrt(diag(solve(t(X) %*% solve(Vm) %*% X)))) #X' Vm-1 X
   #SE <- as.numeric(sqrt(diag(vcov(m1)))) #compare standard errors
+
   SE <- as.numeric(sqrt(diag(br)))
   ttable <- cbind(
     Estimate = round(FE_auto, digits),
     mb.se = round(SE, digits),
+    robust.se = round(robs, digits),
+    t.stat = round(FE_auto / robs, digits),
     df = round(dfn, 1),
-    cr0.se = round(robse, digits),
-    cr2.se = round(rse2, digits),
-    "Pr(>t).cr0" = p.values.cr0,
-    "Pr(>t).cr2" = p.values.cr2
+    "Pr(>t)" = pv
   )
   results <- data.frame(
       Estimate = round(FE_auto, digits),
       mb.se = round(SE, digits),
-      df = round(dfn, 1),
       cr0.se = round(robse, digits),
       cr2.se = round(rse2, digits),
-      p.cr0 = p.values.cr0,
+      df = dfn,
+      p.cr0 = p.values.cr0, #using same dfn
       stars.cr0,
       p.cr2 = p.values.cr2,
       stars.cr2
     )
 
+  type <-  ifelse(type == 'CR2', 'CR2', 'CR0')
+  dft <- ifelse(satt == TRUE, "Satterthwaite", "Between-within")
+
   res <- list(ttable = ttable,
-              results = results)
+              results = results,
+              crtype = type,
+              df = dft,
+              digits = digits)
+
   class(res) <- 'CR2'
   return(res)
 }

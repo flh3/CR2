@@ -27,7 +27,7 @@
 #' \item{mb.se}{The model-based standard errors.}
 #' \item{robust.se}{The empirical, robust standard errors.}
 #' \item{t.stat}{The t-statistics (estimate / robust.se).}
-#' \item{df}{Between-within degrees of freedom (df).}
+#' \item{df}{Satterthwaite or Between-within degrees of freedom (df).}
 #' \item{p.values}{The p values based on the t-statistic and the df.}
 #' \item{Sig}{Stars symbolically showing statistical significance.}
 #'

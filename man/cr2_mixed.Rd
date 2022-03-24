@@ -4,24 +4,26 @@
 \alias{cr2_mixed}
 \title{Cluster robust standard errors with degrees of freedom adjustments for lmerMod/lme objects}
 \usage{
-cr2_mixed(m1, digits = 3, satt = TRUE, Gname = NULL)
+cr2_mixed(m1, digits = 3, type = "CR2", satt = TRUE, Gname = NULL)
 }
 \arguments{
 \item{m1}{The \code{lmerMod} or \code{lme} model object.}
 
 \item{digits}{Number of decimal places to display.}
 
+\item{type}{Type of cluster robust standard error to use ("CR2" or "CR0").}
+
 \item{satt}{If Satterthwaite degrees of freedom are to be computed (if not, between-within df are used).}
 
-\item{Gname}{Group/cluster name if more than two levels of clustering.}
+\item{Gname}{Group/cluster name if more than two levels of clustering (does not work with lme).}
 }
 \value{
 A data frame (\code{results}) with the cluster robust adjustments with p-values.
 \item{Estimate}{The regression coefficient.}
 \item{mb.se}{The model-based (regular, unadjusted) SE.}
-\item{df}{degrees of freedom: between-within or Satterthwaite.}
 \item{cr0.se}{CR0 standard error.}
 \item{cr2.se}{CR2 standard error.}
+#' \item{df}{degrees of freedom: Satterthwaite or between-within.}
 \item{p.cr0}{p-value using CR0 standard error.}
 \item{stars.cr0}{stars showing statistical significance for CR0.}
 \item{p.cr2}{p-value using CR2 standard error.}
@@ -30,10 +32,8 @@ A data frame (\code{results}) with the cluster robust adjustments with p-values.
 \description{
 Function to compute the CR2 cluster
 robust standard errors (SE) with Bell and McCaffrey (2002)
-degrees of freedom (dof) adjustments. Suitable even with a low number.
-Works well with a larger number of clusters but the \code{robust_mixed} function
-may be faster (as it does not have to compute the symmetric square root).
-The model based (mb), CR0, and CR2 are shown for comparison purposes.
+degrees of freedom (dof) adjustments. Suitable even with a low number of clusters.
+The model based (mb), CR0, and CR2 standard errors are shown for comparison purposes.
 }
 \examples{
 require(lme4)

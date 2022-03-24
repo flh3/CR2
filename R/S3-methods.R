@@ -1,7 +1,9 @@
 #' @export
 #' @importFrom stats printCoefmat
 print.CR2 <- function(x, ...){
-  printCoefmat(x$ttable)
+  cat("\nStandard error type =", x$crtype, '\n')
+  cat("Degrees of freedom =", x$df, '\n\n')
+  printCoefmat(x$ttable, x$digits)
 }
 
 #' Compute the inverse square root of a matrix

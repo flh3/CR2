@@ -20,7 +20,7 @@ based on occupation (coded 10: I (highest), 20: II,
 }
 }
 \source{
-\href{https://doi.org/10.7910/DVN/YXMQZM}{Harvard dataverse}
+\doi{10.7910/DVN/YXMQZM}{Harvard dataverse}
 }
 \usage{
 data(sharedat)

@@ -35,7 +35,7 @@
 #' \doi{10.1136/bmj.324.7351.1430}}
 #'
 #'
-#' @source \href{https://doi.org/10.7910/DVN/YXMQZM}{Harvard dataverse}
+#' @source \doi{10.7910/DVN/YXMQZM}{Harvard dataverse}
 #'
 #' @examples
 #' data(sharedat)

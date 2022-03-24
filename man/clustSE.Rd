@@ -18,7 +18,7 @@ clustSE(mod, clust = NULL, digits = 3, ztest = FALSE)
 \value{
 A data frame with the CR adjustments with p-values.
 \item{estimate}{The regression coefficient.}
-\item{se.unadj}{The model-based (reglar, unadjusted) SE.}
+\item{se.unadj}{The model-based (regular, unadjusted) SE.}
 \item{CR0}{Cluster robust SE based on Liang & Zeger (1986).}
 \item{CR1}{Cluster robust SE (using an adjustment based on number of clusters).}
 \item{CR2}{Cluster robust SE based on Bell and McCaffrey (2002).}

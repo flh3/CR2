@@ -16,8 +16,8 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
-URL: https://www.github.com/flh3/CR2
-BugReports: https://www.github.com/flh3/CR2/issues
+URL: https://github.com/flh3/CR2
+BugReports: https://github.com/flh3/CR2/issues
 Depends: 
     R (>= 2.10)
 Imports: 

@@ -23,3 +23,8 @@ satdf(m1, type = "none", Vinv2, Vm2, br2, Gname = NULL)
 Function to compute empirical degrees of freedom
 based on Bell and McCaffrey (2002).
 }
+\author{
+Francis Huang, \email{huangf@missouri.edu}
+
+Bixi Zhang, \email{bixizhang@missouri.edu}
+}

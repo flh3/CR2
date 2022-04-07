@@ -12,6 +12,8 @@
 #' @param br2 The bread component.
 #' @param Gname The group (clustering variable) name'
 #'
+#' @author Francis Huang, \email{huangf@missouri.edu}
+#' @author Bixi Zhang, \email{bixizhang@missouri.edu}
 #'
 #' @export
 ## empirical DOF

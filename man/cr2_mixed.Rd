@@ -23,7 +23,7 @@ A data frame (\code{results}) with the cluster robust adjustments with p-values.
 \item{mb.se}{The model-based (regular, unadjusted) SE.}
 \item{cr0.se}{CR0 standard error.}
 \item{cr2.se}{CR2 standard error.}
-#' \item{df}{degrees of freedom: Satterthwaite or between-within.}
+\item{df}{degrees of freedom: Satterthwaite or between-within.}
 \item{p.cr0}{p-value using CR0 standard error.}
 \item{stars.cr0}{stars showing statistical significance for CR0.}
 \item{p.cr2}{p-value using CR2 standard error.}

@@ -1,4 +1,4 @@
-#' Project SHARE
+#' Data from Project SHARE
 #'
 #' Project SHARE (Sexual Health and Relationships) was a cluster randomized trial (CRT) in
 #' Scotland carried out to measure the impact of a school-based

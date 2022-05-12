@@ -3,7 +3,7 @@
 \docType{data}
 \name{sharedat}
 \alias{sharedat}
-\title{Project SHARE}
+\title{Data from Project SHARE}
 \format{
 A data frame with 5399 observations and 7 variables.
 

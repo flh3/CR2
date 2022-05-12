@@ -1,12 +1,13 @@
 #' Cluster robust standard errors with degrees of freedom adjustments for lmerMod/lme objects
 #'
-#' Function to compute the CR2 cluster
+#' Function to compute the CR2/CR0 cluster
 #' robust standard errors (SE) with Bell and McCaffrey (2002)
 #' degrees of freedom (dof) adjustments. Suitable even with a low number of clusters.
-#' The model based (mb), CR0, and CR2 standard errors are shown for comparison purposes.
+#' The model based (mb) and cluster robust standard errors are shown for comparison purposes.
 #'
 #'
 #' @importFrom stats nobs resid formula residuals var coef pt model.matrix family weights fitted.values
+#' @importFrom methods is
 #' @param m1 The \code{lmerMod} or \code{lme} model object.
 #' @param digits Number of decimal places to display.
 #' @param type Type of cluster robust standard error to use ("CR2" or "CR0").
@@ -15,20 +16,18 @@
 #' @return A data frame (\code{results}) with the cluster robust adjustments with p-values.
 #' \item{Estimate}{The regression coefficient.}
 #' \item{mb.se}{The model-based (regular, unadjusted) SE.}
-#' \item{cr0.se}{CR0 standard error.}
-#' \item{cr2.se}{CR2 standard error.}
+#' \item{cr.se}{The cluster robust standard error.}
 #' \item{df}{degrees of freedom: Satterthwaite or between-within.}
-#' \item{p.cr0}{p-value using CR0 standard error.}
-#' \item{stars.cr0}{stars showing statistical significance for CR0.}
-#' \item{p.cr2}{p-value using CR2 standard error.}
-#' \item{stars.cr2}{stars showing statistical significance for CR2.}
+#' \item{p.val}{p-value using CR0/CR2 standard error.}
+#' \item{stars}{stars showing statistical significance.}
 #'
 #' @references
 #' \cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
 #' (\href{https://www150.statcan.gc.ca/n1/pub/12-001-x/2002002/article/9058-eng.pdf}{link})}
 #'
-#' Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.
-#' \doi{10.1093/biomet/73.1.13}
+#' \cite{Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13-22.
+#' (\href{https://academic.oup.com/biomet/article/73/1/13/246001}{link})
+#' }
 #'
 #' @author Francis Huang, \email{huangf@missouri.edu}
 #' @author Bixi Zhang, \email{bixizhang@missouri.edu}
@@ -36,14 +35,13 @@
 #'
 #' @examples
 #' require(lme4)
-#' data(sch29, package = 'MLMusingR')
-#' robust_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch29))
+#' data(sch25, package = 'CR2')
+#' robust_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 #' @export
 robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL){
 
-  ### for lmer
-  if(class(m1) %in%  c('lmerMod', 'lmerModLmerTest')){ #if lmer
-    dat <- m1@frame
+  if(is(m1, 'lmerMod')){
+   dat <- m1@frame
     X <- model.matrix(m1) #X matrix
     B <- fixef(m1) #coefficients
     y <- m1@resp$y #outcome
@@ -60,11 +58,6 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
     js <- table(dat[, Gname]) #how many observation in each cluster
     G <- bdiag(VarCorr(m1)) #G matrix
 
-    #re <- as.numeric(y - (X %*% B + Z %*% b)) #not used, just checking
-    #data.frame(re, resid(m1)) #the same
-    #cor(re, resid(m1)) #1
-    #qq <- getME(m1, 'q') #columns in RE matrix
-
     NG <- getME(m1, 'l_i') #number of groups :: ngrps(m1)
     NG <- NG[length(NG)]
 
@@ -76,20 +69,20 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
     #   }
     # }
 
-    getV <- function(x) {
-      lam <- data.matrix(getME(x, "Lambdat"))
-      var.d <- crossprod(lam)
-      Zt <- data.matrix(getME(x, "Zt"))
-      vr <- sigma(x)^2
-      var.b <- vr * (t(Zt) %*% var.d %*% Zt)
-      sI <- vr * diag(nobs(x))
-      var.y <- var.b + sI
-    }
+    # getV <- function(x) {
+    #   lam <- data.matrix(getME(x, "Lambdat"))
+    #   var.d <- crossprod(lam)
+    #   Zt <- data.matrix(getME(x, "Zt"))
+    #   vr <- sigma(x)^2
+    #   var.b <- vr * (t(Zt) %*% var.d %*% Zt)
+    #   sI <- vr * diag(nobs(x))
+    #   var.y <- var.b + sI
+    # }
     Vm <- getV(m1)
   }
 
-  ## for nlme
-  if(class(m1) == 'lme'){ #if nlme
+
+  if(is(m1, 'lme')){
     dat <- m1$data
     fml <- formula(m1)
     X <- model.matrix(fml, data = dat)
@@ -118,7 +111,7 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
 
   ### robust computation :: once all elements are extracted
   rr <- y - X %*% B #residuals with no random effects
-
+  #n <- nobs(m1)
   cdata <- data.frame(cluster = gpsv, r = rr)
   k <- ncol(X) #number of predictors (inc intercept)
   gs <- names(table(cdata$cluster)) #name of the clusters
@@ -164,12 +157,17 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
   dd <- lapply(cnames, bb)
   br <- solve(Reduce("+", dd)) #bread
 
+  #rrr <- split(rr, getME(m1, 'flist'))
+  rrr <- split(rr, cdata$cluster)
+
+#### Meat matrix
+
+  if (type == "CR2"){
   tXs <- function(s) {
 
     Ijj <- diag(nrow(XX[[s]]))
     Hjj <- XX[[s]] %*% br %*% t(XX[[s]]) %*% Vm2[[s]]
     IHjj <- Ijj - Hjj
-
     #MatSqrtInverse(Ijj - Hjj) #early adjustment / valid
     V3 <- chol(Vm3[[s]]) #based on MBB
     Bi <- V3 %*% IHjj %*% Vm3[[s]] %*% t(V3)
@@ -179,33 +177,34 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
 
   tX <- lapply(cnames, tXs)
 
-  #rrr <- split(rr, getME(m1, 'flist'))
-  rrr <- split(rr, cdata$cluster)
+  cc2 <- function(x){
+    rrr[[x]] %*% tX[[x]] %*% Vm2[[x]] %*% XX[[x]]
+  }
 
+  u <- t(sapply(1:NG, cc2)) #using 1:NG instead
+
+} else { ## meat matrix for CR0
   # residual x inverse of V matrix x X matrix
   cc0 <- function(x){
     rrr[[x]] %*% Vm2[[x]] %*% XX[[x]]
   }
 
   u <- t(sapply(cnames, cc0))
-
-  cc2 <- function(x){
-    rrr[[x]] %*% tX[[x]] %*% Vm2[[x]] %*% XX[[x]]
-  }
-
-  uu <- t(sapply(1:NG, cc2)) #using 1:NG instead
+}
 
   ## e'(Vg)-1 Xg ## CR0
   ## putting the pieces together
-
   #br2 <- solve(t(X) %*% Vinv %*% X) #bread
-  mt <- t(u) %*% u #meat :: t(u) %*% u
-  clvc2 <- br %*% mt %*% br
-  rse <- sqrt(diag(clvc2))
+  mt <- t(u) %*% u #meat
+  clvc2 <- br %*% mt %*% br #variance covariance matrix
+  rse <- sqrt(diag(clvc2)) #standard errors
 
-  mt2 <- t(uu) %*% uu #meat :: t(u) %*% u
-  clvc2a <- br %*% mt2 %*% br
-  rse2 <- sqrt(diag(clvc2a))
+  ### DEGREES OF FREEDOM :::::::::::::::::
+
+
+  if (satt == TRUE){
+    dfn <- satdf(m1, Gname = Gname, type = type)
+  } else {
 
   ### HLM dof
   chk <- function(x){
@@ -234,35 +233,21 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
 
   dfn <- rep(df1, length(levs)) #naive
   dfn[levs == '2'] <- df2
-
-  dfn.CR0 <- dfn
-
-  if (satt == TRUE){
-    dfn <- satdf(m1, Gname = Gname, type = type)
-  }
+}
 
   robse <- as.numeric(rse)
   FE_auto <- fixef(m1)
   cfsnames <- names(FE_auto)
-  statistic.cr0 <- FE_auto / robse
-  p.values.cr0 = round(2 * pt(-abs(statistic.cr0), df = dfn.CR0), digits) #using CR0
-  stars.cr0 <- cut(p.values.cr0, breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+  statistic <- FE_auto / rse
+  p.values = round(2 * pt(abs(statistic), df = dfn, lower.tail = F), digits)
+  stars <- as.character(cut(p.values, breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
                    labels = c("***", "**", "*", ".", " "), include.lowest = TRUE)
+  )
 
-  statistic.cr2 <- FE_auto / rse2
-  p.values.cr2 = round(2 * pt(-abs(statistic.cr2), df = dfn), digits)
-  stars.cr2 <- cut(p.values.cr2, breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
-                   labels = c("***", "**", "*", ".", " "), include.lowest = TRUE)
+robs <- rse
+pv <- p.values
+vc <- clvc2
 
-
-
-  if (type == 'CR2'){ #to keep things simple
-    robs = rse2
-    pv = p.values.cr2
-  } else {
-    robs = robse
-    pv = p.values.cr0
-  }
 
   #gams <- solve(t(X) %*% solve(Vm) %*% X) %*% (t(X) %*% solve(Vm) %*% y)
   #SEm <- as.numeric(sqrt(diag(solve(t(X) %*% solve(Vm) %*% X)))) #X' Vm-1 X
@@ -278,15 +263,13 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
     "Pr(>t)" = pv
   )
   results <- data.frame(
-    Estimate = round(FE_auto, digits),
-    mb.se = round(SE, digits),
-    cr0.se = round(robse, digits),
-    cr2.se = round(rse2, digits),
+    Estimate = FE_auto,
+    mb.se = SE,
+    cr.se = robse,
+    t.stat = FE_auto / robs,
     df = dfn,
-    p.cr0 = p.values.cr0, #using same dfn
-    stars.cr0,
-    p.cr2 = p.values.cr2,
-    stars.cr2
+    p.val = pv,
+    stars
   )
 
   type <-  ifelse(type == 'CR2', 'CR2', 'CR0')
@@ -296,7 +279,9 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
               results = results,
               crtype = type,
               df = dft,
-              digits = digits)
+              digits = digits,
+              vcov = vc,
+              orig = m1)
 
   class(res) <- 'CR2'
   return(res)

@@ -46,6 +46,9 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
   #if (is.null(data))
   data <- eval(mod$call$data) #OLD
   if (class(mod)[1] != 'glm' & class(mod)[1] != 'lm') stop("Must include a model object of class glm or lm.")
+  # is(mod, c('lm', 'glm')) {
+  #   stop("Must include a model object of class glm or lm.")
+  #   }
   if (is.null(clust)) stop("Must include a cluster name. clust = 'cluster'")
 
   tmp <- summary(mod)

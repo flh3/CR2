@@ -2,51 +2,51 @@
 % Please edit documentation in R/robust_mixed.R
 \name{robust_mixed}
 \alias{robust_mixed}
-\title{Robust standard errors for mixed models}
+\title{Cluster robust standard errors with degrees of freedom adjustments for lmerMod/lme objects}
 \usage{
-robust_mixed(m1, digits = 3, Gname = NULL, satt = TRUE)
+robust_mixed(m1, digits = 3, type = "CR2", satt = TRUE, Gname = NULL)
 }
 \arguments{
-\item{m1}{lme4 or nlme model object.}
+\item{m1}{The \code{lmerMod} or \code{lme} model object.}
 
-\item{digits}{Number of digits for output.}
+\item{digits}{Number of decimal places to display.}
 
-\item{Gname}{Group/cluster name if more than two levels of clustering.}
+\item{type}{Type of cluster robust standard error to use ("CR2" or "CR0").}
 
-\item{satt}{Compute Satterthwaite degrees of freedom.}
+\item{satt}{If Satterthwaite degrees of freedom are to be computed (if not, between-within df are used).}
+
+\item{Gname}{Group/cluster name if more than two levels of clustering (does not work with lme).}
 }
 \value{
-Returns a data frame (\code{results}) containing the estimates, model-based and empirical standard errors,
-as well as the t-statistic, degrees of freedom, and p values.
-\item{Estimate}{Estimated regression coefficients.}
-\item{mb.se}{The model-based standard errors.}
-\item{robust.se}{The empirical, robust standard errors.}
-\item{t.stat}{The t-statistics (estimate / robust.se).}
-\item{df}{Satterthwaite or Between-within degrees of freedom (df).}
-\item{p.values}{The p values based on the t-statistic and the df.}
-\item{Sig}{Stars symbolically showing statistical significance.}
+A data frame (\code{results}) with the cluster robust adjustments with p-values.
+\item{Estimate}{The regression coefficient.}
+\item{mb.se}{The model-based (regular, unadjusted) SE.}
+\item{cr.se}{The cluster robust standard error.}
+\item{df}{degrees of freedom: Satterthwaite or between-within.}
+\item{p.val}{p-value using CR0/CR2 standard error.}
+\item{stars}{stars showing statistical significance.}
 }
 \description{
-If there are more than two levels of clustering, the clustering variable should
-be set at the highest level. Should not be used for inferential statistical testing purposes
-if there are only a few clusters (e.g., < 40). The robust standard errors (CR0) are
-based on the formulation of Liang and Zeger (1986). For a few clusters, use the
-CR2 version with the \code{cr2_mixed} function (also see Pustejovsky & Tipton, 2018).
+Function to compute the CR2/CR0 cluster
+robust standard errors (SE) with Bell and McCaffrey (2002)
+degrees of freedom (dof) adjustments. Suitable even with a low number of clusters.
+The model based (mb) and cluster robust standard errors are shown for comparison purposes.
 }
 \examples{
-data(mtcars)
 require(lme4)
-robust_mixed(lmer(mpg ~ wt + am + (1|cyl), data = mtcars))
-
-data(sch25)
+data(sch25, package = 'CR2')
 robust_mixed(lmer(math ~ male + minority + mses + mhmwk + (1|schid), data = sch25))
 }
 \references{
-Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13–22.
-\doi{10.1093/biomet/73.1.13}
+\cite{Bell, R., & McCaffrey, D. (2002). Bias reduction in standard errors for linear regression with multi-stage samples. Survey Methodology, 28, 169-182.
+(\href{https://www150.statcan.gc.ca/n1/pub/12-001-x/2002002/article/9058-eng.pdf}{link})}
 
-Pustejovsky, J. E. & Tipton, E. (2018). Small sample methods for
-cluster-robust variance estimation and hypothesis testing in fixed effects
-models. \emph{Journal of Business and Economic Statistics, 36}(4), 672-683.
-\doi{10.1080/07350015.2016.1247004}
+\cite{Liang, K.Y., & Zeger, S. L. (1986). Longitudinal data analysis using generalized linear models. \emph{Biometrika, 73}(1), 13-22.
+(\href{https://academic.oup.com/biomet/article/73/1/13/246001}{link})
+}
+}
+\author{
+Francis Huang, \email{huangf@missouri.edu}
+
+Bixi Zhang, \email{bixizhang@missouri.edu}
 }

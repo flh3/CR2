@@ -22,6 +22,6 @@ bibentry(bibtype = "Manual",
     url = "https://github.com/flh3/CR2",
       textVersion  =
   paste("Huang F., & Zhang, B. (2022).",
-        "CR2: cluster robust standard errors for few clusters.",
+        "CR2: Cluster robust standard errors for few clusters.",
         "https://github.com/flh3/CR2")
         )

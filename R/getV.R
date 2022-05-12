@@ -6,6 +6,7 @@
 #' @param x lme4 object
 #' @return V matrix (weight) for multilevel models
 #' @export
+#' @importFrom stats sigma
 getV <- function(x) {
   lam <- data.matrix(getME(x, "Lambdat"))
   var.d <- crossprod(lam)

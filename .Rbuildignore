@@ -3,3 +3,5 @@
 ^LICENSE\.md$
 ^SPSS
 ^tst
+^CRAN-SUBMISSION$
+^cran-comments\.md$

@@ -9,6 +9,9 @@ MatSqrtInverse(A)
 \arguments{
 \item{A}{The matrix object.}
 }
+\value{
+Returns a matrix.
+}
 \description{
 From Imbens and Kolesar (2016).
 }

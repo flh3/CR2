@@ -1,6 +1,8 @@
 ## Changes
 
-Fixed licence text in description.
+- Updated description
+- Added \value to functions requested
+- Fixed licence text in description.
 
 ## R CMD check results
 

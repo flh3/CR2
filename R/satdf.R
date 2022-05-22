@@ -16,6 +16,7 @@
 #' @author Francis Huang, \email{huangf@missouri.edu}
 #' @author Bixi Zhang, \email{bixizhang@missouri.edu}
 #'
+#' @return Returns a vector of degrees of freedom.
 #' @export
 ## empirical DOF
 satdf <- function(m1, type = 'none', Vinv2, Vm2, br2, Gname = NULL){

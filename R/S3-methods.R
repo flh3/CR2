@@ -11,6 +11,7 @@ print.CR2 <- function(x, ...){
 #' From Imbens and Kolesar (2016).
 #' @param A The matrix object.
 #' @export
+#' @return Returns a matrix.
 MatSqrtInverse <- function(A) {
 
   ei <- eigen(A, symmetric = TRUE) #obtain eigenvalues and eigenvectors

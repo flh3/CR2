@@ -19,6 +19,9 @@ satdf(m1, type = "none", Vinv2, Vm2, br2, Gname = NULL)
 
 \item{Gname}{The group (clustering variable) name'}
 }
+\value{
+Returns a vector of degrees of freedom.
+}
 \description{
 Function to compute empirical degrees of freedom
 based on Bell and McCaffrey (2002).

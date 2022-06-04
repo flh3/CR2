@@ -59,12 +59,12 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
   X <- Xo <- model.matrix(mod) #to keep NAs if
   n <- nobs(mod) #how many total observations
 
-  if (family(mod)[[1]] != 'gaussian') X <- X * sqrt(weights(mod, "working"))
-
   if (family(mod)[[1]] != 'gaussian') {
     wts <- weights(mod, "working")
+    X <- X * sqrt(wts)
     #re <- resid(mod, 'working') * wts
-    re <- resid(mod, 'response') #y - pp
+    #re <- resid(mod, 'response') #y - pp
+    re <- resid(mod, 'pearson')
   } else {
     wts <- rep(1, n)
     re <- resid(mod, 'pearson')
@@ -81,8 +81,8 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
 
   NG <- length(table(data[,clust])) #how many clusters
   #cpx <- solve(crossprod(X)) #(X'X)-1 or inverse of the cp of X
-  #cpx <- chol2inv(qr.R(qr(X))) #using QR decomposition, faster, more stable?
-  cpx <- chol2inv(chol(t(Xo) %*% Wm %*% Xo))
+  cpx <- chol2inv(qr.R(qr(X))) #using QR decomposition, faster, more stable?
+  #cpx <- chol2inv(chol(t(Xo) %*% Wm %*% Xo))
 
   cnames <- names(table(data[,clust])) #names of the clusters
   js <- table(data[,clust]) #how many in each cluster
@@ -90,9 +90,9 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
 
   Xj <- function(x){ #inverse of the symmetric square root (p. 709 IK)
     index <- which(data[,clust] == x)
-    Xs <- Xo[index, , drop = F] #X per cluster [original, unweighted]
+    Xs <- X[index, , drop = F] #X per cluster [original, unweighted]
     #wm <- Wm[index, index]
-    Hm <- Xs %*% cpx %*% t(Xs) %*% Wm[index, index] # the Hat matrix, not symmetric
+    Hm <- Xs %*% cpx %*% t(Xs) # %*% Wm[index, index] # the Hat matrix, not symmetric
     #Hm <- sqrt(wm) %*% Xs %*% cpx %*% t(Xs) %*% sqrt(wm) # the Hat matrix
     ## This is the orig formulation
     IHjj <- diag(nrow(Xs)) - Hm
@@ -105,11 +105,6 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
   }
 
   ml <- lapply(cnames, Xj) #need these matrices for CR2 computation
-
-  #########
-  #re <- resid(mod) #regular lm
-  #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "working")  * sqrt(weights(mod, "working")) #manual
-  #if (family(mod)[[1]] != 'gaussian') re <- residuals(mod, "pearson")
 
   #re <- resid(mod, 'pearson') #works for both lm and glm
 
@@ -124,7 +119,7 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
   ## function for Liang and Zeger SEs
   uu1 <- function(x){
     t(cdata$r[cdata$cluster == x]) %*%
-      Xo[cdata$cluster == x, ] #e'X #plain vanilla
+      X[cdata$cluster == x, ] #e'X #plain vanilla
   }
 
   u1 <- t(sapply(cnames, uu1)) #use as a list?
@@ -139,7 +134,7 @@ clustSE <- function(mod, clust = NULL, digits = 3, ztest = FALSE){
   uu2 <- function(x){
     ind <- which(cnames == x)
     t(cdata$r[cdata$cluster == x]) %*% ml[[ind]] %*%
-      Xo[cdata$cluster == x, ]
+      X[cdata$cluster == x, ]
   }
 
   u2 <- t(sapply(cnames, uu2)) #have to transpose because of sapply
@@ -271,7 +266,7 @@ MatSqrtInverse <- function(A) {
   d <- pmax(ei$values, 10^-12) #set negatives values to zero
   d2 <- 1/sqrt(d) #get the inverse of the square root
   d2[d == 0] <- 0
-  ei$vectors %*% (if (length(d2)==1) d2 else diag(d2)) %*% t(ei$vectors)
+  ei$vectors %*% (if (length(d2) == 1) d2 else diag(d2)) %*% t(ei$vectors)
 }
 
 

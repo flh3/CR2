@@ -1,5 +1,12 @@
 ## Changes
 
+Version 0.1.1 2022-06-10
+
+- Updated clustSE function
+- Added crct dataset
+
+Version 0.1.0 2022-05-19
+
 - Updated description
 - Added \value to functions requested
 - Fixed licence text in description.

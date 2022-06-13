@@ -15,13 +15,13 @@ citEntry(
 )
 
 bibentry(bibtype = "Manual",
-         title        = "CR2",
+         title        = "CR2: Compute cluster robust standard errors with degrees of freedom adjustments",
          author       = personList(as.person("Francis Huang"),
                                    as.person("Bixi Zhang")),
-         note = "R package version 0.10",
-    url = "https://github.com/flh3/CR2",
+         note = "R package version 0.1.1",
+    url = "https://CRAN.R-project.org/package=CR2",
       textVersion  =
   paste("Huang F., & Zhang, B. (2022).",
-        "CR2: Cluster robust standard errors for few clusters.",
-        "https://github.com/flh3/CR2")
+        "CR2: Compute cluster robust standard errors with degrees of freedom adjustments",
+        " https://CRAN.R-project.org/package=CR2")
         )

@@ -14,7 +14,7 @@
 #'   \item{female}{Student is female: 1 = yes.}
 #'   \item{stype_ms}{Dummy code for school type; middle school.}
 #'   \item{stype_elem}{Dummy code for school type; elementary school.}
-#'   \item{stype_high}{Dummy code for school type; high school.}
+#'   \item{stype_hs}{Dummy code for school type; high school.}
 #'   \item{race_Black}{Dummy code for student race/ethnicity; Black student.}
 #'   \item{race_Hispanic}{Dummy code for student race/ethnicity; Hispanic student.}
 #' }

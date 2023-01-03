@@ -1,5 +1,16 @@
 ## Changes
 
+Version 0.2.1 2023-01-02
+
+- Added tidy methods so output can be used with modelsummary and gtsummary packages
+
+-- R CMD check results -------------------------------- CR2 0.2.1 ----
+Duration: 3m 27.2s
+
+0 errors v | 0 warnings v | 0 notes v
+
+R CMD check succeeded
+
 Version 0.1.1 2022-06-10
 
 - Updated clustSE function

@@ -1,6 +1,6 @@
 Package: CR2
 Title: Compute Cluster Robust Standard Errors with Degrees of Freedom Adjustments
-Version: 0.1.1
+Version: 0.2.1
 Authors@R: c(
     person("Francis", "Huang",
            role = c("aut", "cre"),
@@ -10,13 +10,13 @@ Authors@R: c(
            role = c("aut"),
            email = "bixizhang@missouri.edu")
            )
-Date: 2022-06-10
+Date: 2023-01-02
 Description: Estimate different types of cluster robust standard errors (CR0, CR1, CR2) with degrees of freedom adjustments. Standard errors are computed based on 'Liang and Zeger' (1986) <doi:10.1093/biomet/73.1.13> and Bell and 'McCaffrey' <https://www150.statcan.gc.ca/n1/en/pub/12-001-x/2002002/article/9058-eng.pdf?st=NxMjN1YZ>. Functions used in Huang and Li <doi:10.3758/s13428-021-01627-0>, Huang, 'Wiedermann', and 'Zhang' <doi:10.1080/00273171.2022.2077290>, and Huang, 'Zhang', and Li (forthcoming: Journal of Research on Educational Effectiveness).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 URL: https://github.com/flh3/CR2
 BugReports: https://github.com/flh3/CR2/issues
 Depends: 
@@ -26,4 +26,10 @@ Imports:
     lme4,
     nlme,
     Matrix,
-    methods
+    methods,
+    generics,
+    magrittr,
+    broom,
+    dplyr,
+    performance,
+    tibble

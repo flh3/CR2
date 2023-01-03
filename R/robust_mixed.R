@@ -196,6 +196,7 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
   ## putting the pieces together
   #br2 <- solve(t(X) %*% Vinv %*% X) #bread
   mt <- t(u) %*% u #meat
+  if (ncol(X) == 1) {mt <- u %*% t(u)} #updated 2022.12.24
   clvc2 <- br %*% mt %*% br #variance covariance matrix
   rse <- sqrt(diag(clvc2)) #standard errors
 
@@ -247,6 +248,7 @@ robust_mixed <- function(m1, digits = 3, type = 'CR2', satt = TRUE, Gname = NULL
 robs <- rse
 pv <- p.values
 vc <- clvc2
+rownames(vc) <- colnames(vc) <- cfsnames #names matrix 2022.12.24
 
 
   #gams <- solve(t(X) %*% solve(Vm) %*% X) %*% (t(X) %*% solve(Vm) %*% y)

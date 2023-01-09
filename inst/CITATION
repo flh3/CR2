@@ -5,14 +5,13 @@ citEntry(
   title    = "Using cluster robust standard errors when analyzing group randomized trials with few clusters",
   author   = c(person("Francis",  "Huang"), person("Xintong", "Li")),
   journal  = "Behavior Research Methods",
-  year     = "2021",
-  url      = "https://rdcu.be/cxyl5",
+  year     = "2022",
+  url      = "https://link.springer.com/epdf/10.3758/s13428-021-01627-0?sharing_token=eIiUEDO3RA7xQuhBbPCeDZAH0g46feNdnc402WrhzypnhGrDXEDh-Uq8KAb789impq-2g25kEJJoCmKwEsXVbXuLkfLHza-JzNwtSCVJlJmHuydDfYKExT_sbRuNeHthDaXyIsjKk9tCd9jOuK4Px2WocvDFoVOyuV-5G7LSq_U%3D",
   textVersion  =
-  paste("Huang F., & Li, X. (2021).",
+  paste("Huang F., & Li, X. (2022).",
         "Using cluster robust standard errors when analyzing group randomized trials with few clusters.",
-        "Behavior Research Methods.",
-        "Retrieved from https://rdcu.be/cxyl5.")
-)
+        "Behavior Research Methods, 54, 1181-1199."
+))
 
 bibentry(bibtype = "Manual",
          title        = "CR2: Compute cluster robust standard errors with degrees of freedom adjustments",
